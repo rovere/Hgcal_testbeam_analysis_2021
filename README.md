@@ -9,8 +9,8 @@ Downlaod scripts
 git clone -b skimmed_tree git@github.com:alpana-hep/Hgcal_testbeam_analysis_2021.git .
 How to run the script:
 
-cd data
-make
+run make
+
 
 ./analyzeHGCOctTB <file_list> outFileName.root data <configuration> <energy> 
 
