@@ -104,13 +104,9 @@ void AnalyzeHGCOctTB::EventLoop(const char *data, const char *energy, const char
   float alpha_ = FH_AH_relative_scale;
   float EE_scale = 94.624; //MIPs per Ge
   float FH_AH_scale = 12.788; //MIPs per GeV
-
-  float ee_rescaling = 1.035;
-  float fh_rescaling = 1.095;
-  float ah_rescaling = 1.095;
   
   char* outFileName = new char[1000];
-  sprintf(outFileName,"./skimmed_ntuple_%s_needtoDelete.root", data);//,Min_, Max_); // the name of the file where you write the tree. 
+  sprintf(outFileName,"./skimmed_ntuple_%s_config22_pions_temp_combinedHgc_Ahc_v46.root", data);//,Min_, Max_);
   TFile* outfile = TFile::Open(outFileName,"recreate");
   //TTree* pion_tree;
   pion_tree = new TTree("pion_variables_v1","variables for pion analysis v1");
@@ -120,60 +116,6 @@ void AnalyzeHGCOctTB::EventLoop(const char *data, const char *energy, const char
                      154 ,158 ,162 ,166 ,170 ,174 ,178, 182, 186, 190 ,194 ,198, 202, 206, 210, 214 ,218, 222,
                   226, 230, 234 ,238, 242 ,246 ,250, 254, 258 ,262 ,266, 270, 274, 278, 282, 286, 290, 294,
                      298, 302 ,306, 310, 314, 318 ,322, 326, 330, 334 ,338 ,342 ,346};
-  char* name1 = new char[1000];
-  //reading chi2 weights
-   sprintf(name1,"./txt_maps/Enrange_min_max_SS_FH.txt");
-   std::fstream file_H_;
-   file_H_.open(name1,ios::in);
-   sprintf(name1,"./txt_maps/Enrange_min_max_SS_EE.txt");
-   std::fstream file_EH_;
-   file_EH_.open(name1,ios::in);
-   std::vector<map<int,double>> en_range_EE_xmin_vec;
-   std::vector<map<int,double>> en_range_EE_xmax_vec;
-   std::vector<map<int,double>> en_range_FH_xmin_vec;
-   std::vector<map<int,double>> en_range_FH_xmax_vec;
-   if(!file_H_.is_open())
-        {
-          std::cout << " file not opened" << std::endl;
-        }
-      else
-        {
-	  int energy;
-          double min_, max_;
-          while (file_H_ >> energy >>min_>>max_) {
-            // int energy;
-            // float min_, max_;
-            // file_H_ >> energy >>min_>>max_;
-            std::map<int,double> en_range_FH_xmin;
-            std::map<int,double> en_range_FH_xmax;
-            en_range_FH_xmin[energy]=min_;
-            en_range_FH_xmax[energy]=max_;
-            en_range_FH_xmin_vec.push_back(en_range_FH_xmin);
-            en_range_FH_xmax_vec.push_back(en_range_FH_xmax);
-          }
-        }
-   if(!file_EH_.is_open())
-        {
-          std::cout << " file not opened" << std::endl;
-        }
-      else
-        {
-	  int energy;
-          double min_, max_;
-          while (file_EH_ >>energy >>min_>>max_) {
-            // int energy;
-            // float min_, max_;
-            // file_EH_ >>energy >>min_>>max_;
-            std::map<int,double> en_range_FH_xmin;
-            std::map<int,double> en_range_FH_xmax;
-            en_range_FH_xmin[energy]=min_;
-            en_range_FH_xmax[energy]=max_;
-            en_range_EE_xmin_vec.push_back(en_range_FH_xmin);
-            en_range_EE_xmax_vec.push_back(en_range_FH_xmax);
-          }
-        }
-
-   //declaring the matrix variables for chi2 optimization
   std::vector<ROOT::Math::SVector<double, 3> >consts_EH_vec;
   std::vector<ROOT::Math::SVector<double, 3> >values_EH_vec;
   std::vector<ROOT::Math::SMatrix<double,3, 3, ROOT::Math::MatRepStd<double,3>> > coeff_EH_vec;
@@ -228,7 +170,7 @@ void AnalyzeHGCOctTB::EventLoop(const char *data, const char *energy, const char
 
   Long64_t jentry;
 
-  //reading the interaction length information layerwise
+
   float lambda[79];
   for(int i = 0; i < 79; i++) {
     lambda[i] = layer_positions[i+1].at(2); // for nuclear interaction length  & //pi_lambda use -at(3)
@@ -241,11 +183,11 @@ void AnalyzeHGCOctTB::EventLoop(const char *data, const char *energy, const char
   //   lambda_pi[i] = layer_positions[i+1].at(3); // for nuclear interaction length  & //pi_lambda use -at(3)
   //   cout<<lambda_pi[i]<<endl;
   // }
-  int ahcal_layer[10]= {43,47,51,55,59,63,67,71,75,79}; 
-  int En_bin[8]={20,50,80,100,120,200,250,300};
+  int ahcal_layer[10]= {43,47,51,55,59,63,67,71,75,79};
+
   for (jentry=0; jentry<nentries;jentry++,hgc_jentry++)
-   {
-         // for (jentry=0; jentry<1000;jentry++,hgc_jentry++) {
+  {
+    //   for (jentry=0; jentry<10000;jentry++,hgc_jentry++) {
     // ==============print number of events done == == == == == == == =
       double progress = 10.0 * jentry / (1.0 * nentries);
       int k = int (progress);
@@ -344,6 +286,12 @@ void AnalyzeHGCOctTB::EventLoop(const char *data, const char *energy, const char
 
       pi_lambda_trimAhcal.clear();
       pi_lambda.clear();
+      // pi_lambda_pi_trimAhcal.clear();
+      // pi_lambda_pi.clear();
+
+      //cout<<"insides the event loop: check2"<<endl;
+
+      //    pion_tree->Fill();
       event_count[0]++;
       pi_event_orig=event;
       pi_ahc_nHits_orig=ahc_nHits;
@@ -357,14 +305,13 @@ void AnalyzeHGCOctTB::EventLoop(const char *data, const char *energy, const char
       pi_ahc_channel_mask=ahc_channel_mask;
       pi_pass_noise_thres=pass_noise_thres;
       
+      
       event_count[1]++;
-      if(!pi_isHGC_AHC_sync)
-	{ cout<<"wrongevents"<<endl;}
       //if(Nrechits_FH_module_42 >80 ||  Nrechits_FH_module_45 > 80){count_fh++; continue;}
       if(isFHNoisy) {count_fh++; continue;}
       event_count[2]++;
       h_true_beamenergy[1]->Fill(trueBeamEnergy);
-       //good track      
+       //good track
       bool isGoodTrack = (dwcReferenceType >= 13 && trackChi2_X < 10 && trackChi2_Y < 10);
       if(!isGoodTrack) { count_badtrack++; continue;}
       event_count[3]++;
@@ -373,19 +320,17 @@ void AnalyzeHGCOctTB::EventLoop(const char *data, const char *energy, const char
       if(MuonVeto) continue;
       event_count[4]++;
       h_true_beamenergy[3]->Fill(trueBeamEnergy);
-      //preshower
       if(rechit_shower_start_layer<=2) continue;
       event_count[5]++;
       h_true_beamenergy[4]->Fill(trueBeamEnergy);
-      //track impact only for TB data & discrete simulation but not for flat energy samples (no track impact information was available)
-      if(!strcmp(data,"data") || !strcmp(data,"sim_discrete")) {
-	if(!isInTrackWindow) continue;
-      }
-      event_count[6]++;
-      h_beamenergy->Fill(beamEnergy);
+      // if(!isInTrackWindow) continue;
+      // event_count[6]++;
+      // h_beamenergy->Fill(beamEnergy);
+      // //      h_true_beamenergy->Fill(trueBeamEnergy);
       h_particle->Fill(pdgID);
       
       //for tree
+
       //pi_isHGC_AHC_sync = true;
       pi_event = event;
       pi_run = run;
@@ -419,8 +364,6 @@ void AnalyzeHGCOctTB::EventLoop(const char *data, const char *energy, const char
       pi_energyLostBeam = energyLostBeam;
       
       //pion_tree->Fill();
-
-      //variables declaration
       totalEnergy_inGeV=0;
       EnergySum_SSinEE=0;
       EnergySum_SSinFH=0;
@@ -438,162 +381,51 @@ void AnalyzeHGCOctTB::EventLoop(const char *data, const char *energy, const char
       rechits_EE=0;
       rechits_FH=0;
       rechits_AH=0;
+      // if(event ==3482)
+      // 	{	//	continue;
       int nrechit_trimAhcal=0;
       /// Read HGCAL Tree
       if(DEBUG) cout<<"DEBUG: Start Analylizing HGCAL  RecHits!!"<<endl;
       // total_rechits_energy_EE=0;
       // total_rechits_energy_FH=0;
-      float dr_a=999.0,dr_b=999.0;
-      int count_rechit[4]={};
       for( int i = 0 ; i < NRechits; i++)
       	{
       	  int channel = rechit_channel->at(i);
       	  int chip = rechit_chip->at(i);
       	  int en_chan = 1000*chip + channel;
       	  int layer = rechit_layer->at(i);
-	  float energy=rechit_energy->at(i);
+      	  float energy=rechit_energy->at(i);
+	  //	  bool flag_ = 0;
+	  //	  pi_trimmed_ahcal_flag=flag_;
 	  if(hgc_channel_mask->at(i)) continue;
   	  if(!pass_noise_thres->at(i))continue;
+	  //cout<<rechit_x->at(i)<<"x"<<rechit_y->at(i)<<"y"<<endl;
 	  double trackx = TrackImpactX_layer->at(layer-1);
           double tracky =TrackImpactY_layer->at(layer-1);
 	  float lam_ = lambda[layer-1];
-	  count_rechit[0]++;
+	  // float lam_pi = lambda_pi[layer-1];
+	  // pi_lambda_pi.push_back(lam_pi);
+	  // pi_lambda_pi_trimAhcal.push_back(lam_pi);
 	  pi_lambda.push_back(lam_);
 	  pi_lambda_trimAhcal.push_back(lam_);
 	  float recx = rechit_x->at(i);
 	  float	recy = rechit_y->at(i);
-	  float recx_ini = rechit_x->at(i);
-          float recy_ini = rechit_y->at(i);
-	  float dX=0.0,dY=0.0,dX_in=0.0,dY_in=0.0;
+	  pi_trimmed_ahcal_flag.push_back(1);
+	  //if(!strcmp(data,"data")) {
+	    // trackx = -1*trackx;
+	    // tracky = -1*tracky;
 
-	  //pi_trimmed_ahcal_flag.push_back(1);
-	  if(!strcmp(data,"data")) {
-	    //cout<<"inside the loop"<<endl;
-	    if(layer<28 && layer==1)
-              {
-                h_xVs_trackX[0]->Fill(trackx,recx);//,trackx);
-                h_yVs_trackY[0]->Fill(tracky,recy);
-              }
-            else
-              {
-		if(layer==29)
-		  {
-		    h_xVs_trackX[1]->Fill(trackx,recx);//,trackx);
-		    h_yVs_trackY[1]->Fill(tracky,recy);//,tracky);
-		  }
-	      }
-	    
-	    trackx = -1*trackx;
-	    tracky = -1*tracky;
-	     if(layer<28 && layer==1)
-              {
-                h_xVs_1trackX[0]->Fill(trackx,recx);
-                h_yVs_1trackY[0]->Fill(tracky,recy);
-              }
-            else
-              {
-		if(layer==29)
-		  {
-		    h_xVs_1trackX[1]->Fill(trackx,recx);
-		    h_yVs_1trackY[1]->Fill(tracky,recy);
-		  }
-              }
-
-
-	     dX = recx - trackx;
-	     dY = recy - tracky;
-	     dX_in= dX;
-	     dY_in= dY;
-	    if(layer==1)
-	      {
-		h_dXvsdY_EE[0]->Fill(dX,dY);
-		h_dX_EE[0]->Fill(dX);
-		h_dY_EE[0]->Fill(dY);
-	      }
-	    else if (layer==14)
-	    {
-	      h_dXvsdY_EE[1]->Fill(dX,dY);
-	      h_dX_EE[1]->Fill(dX);
-	      h_dY_EE[1]->Fill(dY);
-	    }
-          else if (layer==29)
-	    {
-	      h_dXvsdY_FH[0]->Fill(dX,dY);
-	      h_dX_FH[0]->Fill(dX);
-              h_dY_FH[0]->Fill(dY);
-	    }
-          else if(layer==34)
-	    {
-	      h_dXvsdY_FH[1]->Fill(dX,dY);
-	      h_dX_FH[1]->Fill(dX);
-              h_dY_FH[1]->Fill(dY);
-	    }
-	    h_muo_dxvsdy->Fill(dX,dY);
-	    float dR = sqrt((dX*dX)+(dY*dY));
-	    //h_dR->Fill(dR);
-	    if(dr_a>dR) //to fill the minimum dR
-	      dr_a=dR;
-	    std::pair<float, float> dxy_al = dxy_alignment(layer);
-	    float dx_corr = dxy_al.first;
-	    float dy_corr = dxy_al.second; 
-	    recx -= dx_corr; //correcting for alignment
-	    recy -= dy_corr;
-	    dX = recx - trackx;
-	    dY = recy - tracky;
-	    if(layer==1)	      
-	      h_dXvsdY_EE_Acorr[0]->Fill(dX,dY);
-	      
-	    else if (layer==14)
-	      h_dXvsdY_EE_Acorr[1]->Fill(dX,dY);
-	    else if (layer==29)
-	      h_dXvsdY_FH_Acorr[0]->Fill(dX,dY);
-	    else if(layer==6)
-	      h_dXvsdY_FH_Acorr[1]->Fill(dX,dY);
-
-	    dR = sqrt((dX*dX)+(dY*dY));
-	    if(dr_b>dR)
-	      dr_b=dR;
-	    h_muo_dxvsdy_afterCorr->Fill(dX,dY);
-	    //h_dR_afterCorr->Fill(dR);
-
-	    
-	  }
-	  float recx_fin = recx;
-          float recy_fin = recy;
-	  // regularizing the hits going beyond HGCAl physical boundaries
-	  if(layer<=28)
-	    {
-	      if(recx_fin>7.5 || recx_fin <(-7.5) ||recy_fin>7.5 || recy_fin<(-7.5))
-		{
-		  count_rechit[1]++;
-		  if(recx_fin>7.5)
-		    recx = 7.5;
-		  else if (recx_fin <(-7.5))
-		    recx=-7.5;
-		  else if(recy_fin>7.5)
-		    recy=7.5;
-		  else if(recy_fin<(-7.5))
-		    recy=-7.5;
-		      
-		}
-	    }
-	  else
-	    {
-	      if(recx_fin>18.5 || recx_fin <(-18.5) ||recy_fin>18.5 || recy_fin<(-18.5))
-		{
-		  count_rechit[2]++;
-		  if(recx_fin>18.5)
-                    recx = 18.5;
-                  else if (recx_fin <(-18.5))
-                    recx=-18.5;
-                  else if(recy_fin>18.5)
-                    recy=18.5;
-                  else if(recy_fin<(-18.5))
-                    recy=-18.5;
-		}
-
-	    }
-
+	    // std::pair<float, float> dxy_al = dxy_alignment(layer);
+	    // float dx_corr = dxy_al.first;
+	    // float dy_corr = dxy_al.second; 
+	    // recx -= dx_corr;
+	    // recy -= dy_corr;
+	    //}
+	  //cout<<layer<<endl;
+	  // if(layer==28)
+	  //   cout<<"CE-E boundary"<<"\t"<<rechit_z->at(i)<<endl;
+	  // else if (layer==40)
+	  //   cout<<"CE-H boundary"<<"\t"<<rechit_z->at(i)<<endl;
 	  pi_rechit_layer.push_back(layer);
 	  pi_rechit_energy.push_back(energy);
   	  pi_rechit_x.push_back(recx);//hit_x->at(i));
@@ -611,9 +443,12 @@ void AnalyzeHGCOctTB::EventLoop(const char *data, const char *energy, const char
   	  pi_rechit_amplitudeLow.push_back(rechit_amplitudeLow->at(i));
   	  pi_rechit_noise_flag.push_back(rechit_noise_flag->at(i));
 	  pi_rechit_module.push_back(rechit_module->at(i));
+  	  //pi_rechit_layer->push_back(rechit_layer->at(i));
+	  //cout<<"hgcal"<<"x"<<"\t"<<rechit_x->at(i)<<"y"<<"\t"<<rechit_y->at(i)<<"\t"<<"z"<<rechit_z->at(i)<<endl;
   	  pi_rechit_chip.push_back(rechit_chip->at(i));
   	  pi_rechit_channel.push_back(rechit_channel->at(i));
   	  pi_rechit_type.push_back(rechit_type->at(i));
+	  //filling the combined branches
 
 	  pi_combined_rechits_energy.push_back(energy);
 	  pi_combined_rechit_x.push_back(recx);//hit_x->at(i));
@@ -623,69 +458,8 @@ void AnalyzeHGCOctTB::EventLoop(const char *data, const char *energy, const char
 	  nrechits++;
 	  nrechit_trimAhcal++;
 	  h_rechitvslambda->Fill(lam_,energy);
-	  //filling histograms energy wise
-	  for(int ibin=0;ibin<8;ibin++)
-	    {
-	      float True_Energy =0.0;
-	      if(!strcmp(data,"data"))
-		True_Energy = beamEnergy;
-	      else
-		True_Energy =trueBeamEnergy;
-	      if(True_Energy>=En_bin[ibin]-2 && True_Energy<=En_bin[ibin]+2)
-		{		  
-		  h_xVsy[ibin]->Fill(recx_ini,recy_ini);
-		  h_xVsy_corr[ibin]->Fill(recx_fin,recy_fin);
-		  if(layer<=28)
-		    {
-		      
-		      h_xVsy_EE[ibin]->Fill(recx_ini,recy_ini);
-		      h_xVsy_corr_EE[ibin]->Fill(recx_fin,recy_fin);
-		      if(layer==1)
-			{
-			  h_xVsy_EE_l1[ibin]->Fill(recx_ini,recy_ini);
-			  h_xVsy_EE_l1_Acorr[ibin]->Fill(recx_fin,recy_fin);
-			}
-		      else if(layer==14)
-			{
-			  h_xVsy_EE_l14[ibin]->Fill(recx_ini,recy_ini);
-			 h_xVsy_EE_l14_Acorr[ibin]->Fill(recx_fin,recy_fin);
-			}
-
-		      if(rechit_shower_start_layer>20 && layer==1)
-			{
-			  h_xVsy_SS20_EE_l1[ibin]->Fill(dX_in,dY_in);//recx_ini,recy_ini);
-			  h_xVsy_SS20_EE_l1_Acorr[ibin]->Fill(dX,dY);//recx_fin,recy_fin);
-			}
-		      else if (rechit_shower_start_layer>20 && layer==14)
-			{
-			  h_xVsy_SS20_EE_l14[ibin]->Fill(dX_in,dY_in);//recx_ini,recy_ini);
-                          h_xVsy_SS20_EE_l14_Acorr[ibin]->Fill(dX,dY);//recx_fin,recy_fin);
-
-			}
-		    }
-		  else
-		    {
-		      h_xVsy_FH[ibin]->Fill(recx_ini,recy_ini);
-		      h_xVsy_corr_FH[ibin]->Fill(recx_fin,recy_fin);
-		       if(layer==29)
-                        {
-                          h_xVsy_FH_l1[ibin]->Fill(recx_ini,recy_ini);
-                          h_xVsy_FH_l1_Acorr[ibin]->Fill(recx_fin,recy_fin);
-                        }
-                      else if(layer==34)
-                        {
-                          h_xVsy_FH_l6[ibin]->Fill(recx_ini,recy_ini);
-                         h_xVsy_FH_l6_Acorr[ibin]->Fill(recx_fin,recy_fin);
-                        }
-
-		    }
-
-		}
-	    }
 	  if(layer<=28)
 	    {
-	      
-	      energy = energy/ee_rescaling;
 	      h_rechits_mips_EE->Fill(energy);
 	      h_rechits_GeV_EE->Fill(energy*0.0105);
 	      Esum_rechits_EE+=energy;
@@ -693,15 +467,38 @@ void AnalyzeHGCOctTB::EventLoop(const char *data, const char *energy, const char
 	    }
 	  else
 	    {
-	      energy = energy/fh_rescaling;
 	      h_rechits_mips_FH->Fill(energy);
               h_rechits_GeV_FH->Fill(energy*0.0789);
-	      Esum_rechits_FH+=energy;
-	      rechits_FH++;
+
+	    Esum_rechits_FH+=energy;
+	    rechits_FH++;
 	    }
   	  } //Nrechits loop
+      //pion_tree->Fill();
       pi_NRechits = nHgc;
-
+      // h_EnergySum_inEE->Fill(Esum_rechits_EE);
+      // h_EnergySum_inFH->Fill( Esum_rechits_FH);
+      // h_EnergySum_inEE_inGeV->Fill(0.0105*1.5*Esum_rechits_EE);
+      // h_EnergySum_inFH_inGeV->Fill(0.0789*Esum_rechits_FH);
+      // h_EnergySum_inEE_Mipsvs_true->Fill(Esum_rechits_EE,trueBeamEnergy);
+      // h_EnergySum_inFH_Mipsvs_true->Fill(Esum_rechits_FH,trueBeamEnergy);
+      // if(trueBeamEnergy>=48 && trueBeamEnergy<=52)
+      // 	{
+      // 	  if(rechit_shower_start_layer<=28)
+      // 	    {
+      // 	      h_ssinEE->Fill((0.0105*Esum_rechits_EE)+(0.0789* Esum_rechits_FH));
+      // 	    }
+      // 	  // else
+      // 	  //   h_mipsinEE->Fill(
+      // 	}
+      //      total_rechits = 
+	
+      // pi_rechit_x->clear();
+      // pi_rechit_y->clear();
+      // //////////////////////////////////////////
+      
+      
+      // //    cout<<NRechits<<"\t"<<count<<endl;
       
       // ////////////////////////////////////////////
       // //            AHCAL Part                  //
@@ -711,9 +508,11 @@ void AnalyzeHGCOctTB::EventLoop(const char *data, const char *energy, const char
       
       if(DEBUG) cout<<"DEBUG: Start Analylizing AHCAL  RecHits!!"<<endl;
       //cout<<ahc_nHits<<"ahcal"<<endl;
-      float rechitEnergySum_AH_trimm=0.0;
+      float rechitEnergySum_AH=0.0;
       for(int i = 0 ; i < ahc_nHits; i++) {
       	if(ahc_channel_mask->at(i)) continue;
+	// if(ahc_hitK->at(i)==1)
+	//   cout<<"Ah boundary"<<"\t"<<ahc_hitZ->at(i)<<endl;
   	pi_ahc_hitI.push_back(ahc_hitI->at(i));
   	pi_ahc_hitJ.push_back(ahc_hitJ->at(i));
   	pi_ahc_hitK.push_back(ahc_hitK->at(i));
@@ -722,126 +521,30 @@ void AnalyzeHGCOctTB::EventLoop(const char *data, const char *energy, const char
 	// pi_lambda_pi.push_back(lam_pi);
 	pi_lambda.push_back(lam_);
 	h_rechitvslambda->Fill(lam_,ahc_hitEnergy->at(i));
-	count_rechit[0]++;
+
  	pi_ahc_hitZ.push_back(ahc_hitZ->at(i));
   	pi_ahc_hitEnergy.push_back(ahc_hitEnergy->at(i));
+	//cout<<"x"<<"\t"<<ahc_hitX->at(i)<<"\t"<<"y"<<ahc_hitY->at(i)<<"\t"<<"z"<<ahc_hitZ->at(i)<<endl;
+  	// pi_ahc_energyPerLayer.push_back(ahc_energyPerLayer->at(i));
+  	// pi_ahc_nHitsPerLayer.push_back(ahc_nHitsPerLayer->at(i));
 	int layer = ahc_hitK->at(i)+40;
-	//alignment corrections
+	//cout<<layer<<"layer"<<endl;
+	//filling the combined information
 	double trackx = TrackImpactX_layer->at(layer-1);// track_x[layer-1];
 	double tracky =  TrackImpactY_layer->at(layer-1);//track_y[layer-1];
-	
+
 	float recx =ahc_hitX->at(i);
 	float recy =ahc_hitY->at(i);
-	float recx_ini = recx;
-	float recy_ini = recy;
-	if(layer==41)
-	  {
-	    h_xVs_trackX[2]->Fill(trackx,recx);
-	    h_yVs_trackY[2]->Fill(tracky,recy);
-	  }
-	//layer=ahc_hitK->at(i);
-	if(!strcmp(data,"data")) {
+	//if(!strcmp(data,"data")) {
 	  // trackx = -1*trackx;
 	  // tracky = -1*tracky;
-	  if(layer==41)
-	    {
-	      h_xVs_1trackX[2]->Fill(trackx,recx);
-	      h_yVs_1trackY[2]->Fill(tracky,recy);
-	    }
-	  float dX = recx - trackx;
-	  float dY = recy - tracky;
 	  
-	  if(layer-40==1)
-	    {
-	    h_dXvsdY_AH[0]->Fill(dX,dY);
-	    h_dX_AH[0]->Fill(dX);
-	    h_dY_AH[0]->Fill(dY);
-	    }
-	  else if (layer-40==20)
-	    {
-	      h_dXvsdY_AH[1]->Fill(dX,dY);
-	      h_dX_AH[1]->Fill(dX);
-	      h_dY_AH[1]->Fill(dY);
-
-	    }
-
-	  h_muo_dxvsdy->Fill(dX,dY);
-	  float dR = sqrt((dX*dX)+(dY*dY));
-	  if(dr_a>dR)
-              dr_a=dR;
-
-	  //h_dR->Fill(dR);
-	  std::pair<float, float> dxy_al = dxy_alignment(layer);
-	  float dx_corr = dxy_al.first;
-	  float dy_corr = dxy_al.second;
-	  recx -= dx_corr;
-	  recy -= dy_corr;
-	  dX = recx - trackx;
-	  dY = recy - tracky;
-	   if(layer-40==1)
-            h_dXvsdY_AH_Acorr[0]->Fill(dX,dY);
-          else if (layer-40==20)
-            h_dXvsdY_AH_Acorr[1]->Fill(dX,dY);
-
-	  dR = sqrt((dX*dX)+(dY*dY));
-	  if(dr_b>dR)
-              dr_b=dR;
-
-	  h_muo_dxvsdy_afterCorr->Fill(dX,dY);
-	  //h_dR_afterCorr->Fill(dR);
-
 	  // std::pair<float, float> dxy_al = dxy_alignment(layer);
 	  // float dx_corr = dxy_al.first;
 	  // float dy_corr = dxy_al.second;
 	  // recx -= dx_corr;
 	  // recy -= dy_corr;
-	  }
-	float recx_fin = recx;
-        float recy_fin = recy;
-	//regularizning the alignment
-       if(recx_fin>36 || recx_fin <(-36) ||recy_fin>36 || recy_fin<(-36))
-	 {
-                count_rechit[3]++;
-		if(recx_fin>18.5)
-                    recx = 18.5;
-                  else if (recx_fin <(-18.5))
-                    recx=-18.5;
-                  else if(recy_fin>18.5)
-                    recy=18.5;
-                  else if(recy_fin<(-18.5))
-                    recy=-18.5;
-
-
-	 }
-	for(int ibin=0;ibin<8;ibin++)
-            {
-	      float True_Energy =0.0;
-              if(!strcmp(data,"data"))
-                True_Energy = beamEnergy;
-              else
-                True_Energy =trueBeamEnergy;
-              if(True_Energy>=En_bin[ibin]-2 && True_Energy<=En_bin[ibin]+2)
-                {
-                  h_xVsy[ibin]->Fill(recx_ini,recy_ini);
-                  h_xVsy_corr[ibin]->Fill(recx_fin,recy_fin);
-		  h_xVsy_AH[ibin]->Fill(recx_ini,recy_ini);
-		  h_xVsy_corr_AH[ibin]->Fill(recx_fin,recy_fin);
-		   if(layer-40==1)
-			{
-                          h_xVsy_AH_l1[ibin]->Fill(recx_ini,recy_ini);
-                          h_xVsy_AH_l1_Acorr[ibin]->Fill(recx_fin,recy_fin);
-                        }
-                      else if(layer-40==20)
-                        {
-                          h_xVsy_AH_l20[ibin]->Fill(recx_ini,recy_ini);
-                         h_xVsy_AH_l20_Acorr[ibin]->Fill(recx_fin,recy_fin);
-                        }
-
-                }
-            }
-
-	h_dR_afterCorr->Fill(dr_b);
-	h_dR->Fill(dr_a);
+	  //}
 	pi_ahc_hitX.push_back(recx);
         pi_ahc_hitY.push_back(recy);
 
@@ -851,7 +554,7 @@ void AnalyzeHGCOctTB::EventLoop(const char *data, const char *energy, const char
 	pi_combined_rechit_z.push_back(ahc_hitZ->at(i)+offset);
 	nAhc++;
 	nrechits++;
-	Esum_rechits_AH+=(ahc_hitEnergy->at(i)/ah_rescaling);
+	Esum_rechits_AH+=ahc_hitEnergy->at(i);
 	h_rechits_mips_AH->Fill(ahc_hitEnergy->at(i));
 	
 	h_rechits_GeV_AH->Fill(ahc_hitEnergy->at(i)*0.0316);
@@ -870,18 +573,18 @@ void AnalyzeHGCOctTB::EventLoop(const char *data, const char *energy, const char
 		pi_comb_rechit_x_trimAhcal.push_back(recx);
 		pi_comb_rechit_y_trimAhcal.push_back(recy);
 		pi_comb_rechit_z_trimAhcal.push_back(ahc_hitZ->at(i)+offset);
-		rechitEnergySum_AH_trimm+=ahc_hitEnergy->at(i);
+		rechitEnergySum_AH+=ahc_hitEnergy->at(i);
 		nrechit_trimAhcal++;
-		count++;		
+		count++;
+		
 	      }
 	  }
 	//cout<<count<<endl;
 	//if(count==0)
-	//	pi_trimmed_ahcal_flag.push_back(count);
+	pi_trimmed_ahcal_flag.push_back(count);
 	  
-      }// AHCAL hit loop
-   
-      // code to get the updated relative weight between FH and AH after emoving additional layers
+      }//
+
       if(trueBeamEnergy>=48 && trueBeamEnergy<=52)
         {
 	  if(rechit_shower_start_layer>28)
@@ -891,9 +594,9 @@ void AnalyzeHGCOctTB::EventLoop(const char *data, const char *energy, const char
 	      for(int ii = 0; ii < 50; ii++)
 		{
 		  rel_weight = step_*(ii+1);
-		  h_rechit_energy_FB_rel_weightScan[ii]->Fill(Esum_rechits_FH+(rel_weight*rechitEnergySum_AH_trimm)); 
+		  h_rechit_energy_FB_rel_weightScan[ii]->Fill(Esum_rechits_FH+(rel_weight*rechitEnergySum_AH)); 
 		}
-	      h_mipsinEE->Fill((Esum_rechits_EE*0.0105)+(0.0789*Esum_rechits_FH)+(0.07574*rechitEnergySum_AH_trimm));
+	      h_mipsinEE->Fill((Esum_rechits_EE*0.0105)+(0.0789*Esum_rechits_FH)+(0.07574*rechitEnergySum_AH));
 	    }
 	}
       h_true_beamenergy[5]->Fill(trueBeamEnergy);
@@ -901,26 +604,10 @@ void AnalyzeHGCOctTB::EventLoop(const char *data, const char *energy, const char
       pi_combined_NRechits=nrechits;
       pi_Nrechit_trimAhcal=nrechit_trimAhcal;
       nrechit_trimAhcal=0;
-      pion_tree->Fill();
-      // cout<<"total rechits"<<"\t"<<count_rechit[0]<<"\t"<<count_rechit[1]<<"\t"<<count_rechit[2]<<endl;
-      // cout<<"fraction"<<"\t"<<count_rechit[1]/count_rechit[0]<<"\t"<<count_rechit[2]/count_rechit[0]<<endl;
-      hist_total->Fill(count_rechit[0]);
-      float frac = count_rechit[1];///count_rechit[0];
-      hist_frac_EE->Fill(frac);
-      frac = count_rechit[2];///count_rechit[0];
-      hist_frac_FH->Fill(frac);
-      frac = count_rechit[3];///count_rechit[0];
-      hist_frac_AH->Fill(frac);
-      
-      count_rechit[0]=0;
-      count_rechit[1]=0;
-      count_rechit[2]=0;
-      count_rechit[3]=0;
+      //      pion_tree->Fill();
       rechits_AH = nAhc;
       total_rechits = nrechits;
-      nrechits=0;
-      nHgc=0;
-      nAhc =0;
+
       Esum_rechits_EE_inGeV=0.0105*Esum_rechits_EE;
       Esum_rechits_FH_inGeV= 0.0789*Esum_rechits_FH;
       Esum_rechits_AH_inGeV=0.0316*Esum_rechits_AH;
@@ -942,8 +629,8 @@ void AnalyzeHGCOctTB::EventLoop(const char *data, const char *energy, const char
       h_EnergySum_inEE_Mipsvs_true->Fill(Esum_rechits_EE,trueBeamEnergy);
       h_EnergySum_inFH_Mipsvs_true->Fill(Esum_rechits_FH,trueBeamEnergy);
 
-      // nrechits=0;
-      // nHgc=0;
+      nrechits=0;
+      nHgc=0;
       // Esum_rechits_EE_inGeV=0.0105*Esum_rechits_EE;
       // Esum_rechits_FH_inGeV= 0.0789*Esum_rechits_FH;
       // Esum_rechits_AH_inGeV=0.0316*Esum_rechits_AH;
@@ -975,55 +662,37 @@ void AnalyzeHGCOctTB::EventLoop(const char *data, const char *energy, const char
 
       double rechitEnergySum_EE = Esum_rechits_EE;
       double rechitEnergySum_FH = Esum_rechits_FH;
-      double rechitEnergySum_AH = Esum_rechits_AH;
+      rechitEnergySum_AH = Esum_rechits_AH;
       double EE_detscale = Esum_rechits_EE_inGeV;//(0.0105rechitEnergySum_EE/EE_scale);                                        
       double FH_detscale = Esum_rechits_FH_inGeV;//(rechitEnergySum_FH/FH_AH_scale);                                                 
       double AH_detscale = Esum_rechits_AH_inGeV;//(alpha_*rechitEnergySum_AH)/FH_AH_scale;                                   
       double full_energy = FH_detscale+AH_detscale;                                                                                       
       double total_energy= (rechitEnergySum_EE/EE_scale) + (rechitEnergySum_FH+ (alpha_ * rechitEnergySum_AH))/FH_AH_scale;
-      double tot_E_gev= total_energy;
+      
       ///////////////////////////////////////////////////////////                                                                           
       /////     H hadrons ; Chi2 matrix initialzation     /////                                                                             
       //////////////////////////////////////////////////////////
       //filling the chi2 energy
-      //cout<<"check2"<<"H-hadronsinitialize tree branch"<<endl;
-      total_energy = (rechitEnergySum_FH+ (alpha_ * rechitEnergySum_AH))/FH_AH_scale+0.4;
-
+      // float w1 = getChi2Weights_H(beamEnergy).at(0);                                                                                      
+      // float w2 = getChi2Weights_H(beamEnergy).at(1);                                                                                      
+      // float w3 = getChi2Weights_H(beamEnergy).at(2);  
+      
       double E_beam =0.0;
       double O = 0.0;
       double sigma2_H = (0.089*0.089)*(total_energy*total_energy) + (1.25*1.25)*total_energy;
-      //double tot_E_gev= total_energy;
-      
-      //      cout<<rechit_shower_start_layer<<"\t"<<trueBeamEnergy<<endl;
+      double tot_E_gev= total_energy;
       for(int i_bin=0;i_bin<85;i_bin++)
 	{
-	  //cout<<"check4"<<"in the loop"<<"\t"<<i_bin<<endl;
-	  bool IsIn_en_range = false;
           if(trueBeamEnergy>=Elist[i_bin] && trueBeamEnergy <=Elist[i_bin]+4)
             {
-	      //cout<<"check7"<<"in the loop"<<"\t"<<i_bin<<endl;
 	      
 	      E_beam = Elist[i_bin]+2;
-	      
+	      float w1 = getChi2Weights_H(E_beam).at(0);
+	      float w2 = getChi2Weights_H(E_beam).at(1);
+	      float w3 = getChi2Weights_H(E_beam).at(2);
+
 	      if(rechit_shower_start_layer>28)
 		{
-		  
-		  //cout<<"check8"<<"in the loop"<<"\t"<<i_bin<<endl;
-		  
-		  float w1 = getChi2Weights_H(E_beam).at(0);
-		  float w2 = getChi2Weights_H(E_beam).at(1);
-		  float w3 = getChi2Weights_H(E_beam).at(2);
-		  //cout<<"check5"<<"in the loop"<<"\t"<<i_bin<<endl;
-		  float chi2_energy = w1*rechitEnergySum_EE + w2*rechitEnergySum_FH + w3*rechitEnergySum_AH + O;
-		  if(chi2_method > 0)  {
-		    if(chi2_method == 1) O = 0.4;
-		    chi2_energy = w1*1.0 + w2*FH_detscale + w3*AH_detscale + O;
-		  }
-		  hist_resp_total_1[i_bin]->Fill(chi2_energy);
-		  hist_resp_SS_FH_1[i_bin]->Fill(chi2_energy);
-		  hist_fixwt_total[i_bin]->Fill(total_energy);
-                  hist_fixwt_SS_FH[i_bin]->Fill(total_energy);
-
 		  ROOT::Math::SMatrix<double,2, 2, ROOT::Math::MatRepStd<double,2> > coeffs_H;
 		  ROOT::Math::SVector<double, 2> consts_H;
 		  ROOT::Math::SVector<double, 2> values_H;
@@ -1034,10 +703,7 @@ void AnalyzeHGCOctTB::EventLoop(const char *data, const char *energy, const char
 		    consts_H(i) = 0.0;
 		    values_H(i) = 0.0;
 		  }
-		  IsIn_en_range = (total_energy > en_range_FH_xmin_vec[i_bin][Elist[i_bin]+2] && total_energy < en_range_FH_xmax_vec[i_bin][Elist[i_bin]+2]);
-		  //IsIn_en_range = true;
-		  if(IsIn_en_range){
-
+		  
 		  if(chi2_method == 0)
 		    {
 		      coeffs_H(0,0) = (rechitEnergySum_FH*rechitEnergySum_FH)/sigma2_H;
@@ -1063,28 +729,10 @@ void AnalyzeHGCOctTB::EventLoop(const char *data, const char *energy, const char
 		      coeff_H_vec[i_bin]+=coeffs_H;
 
 		    }
-		  }
 		}
-	      else if (rechit_shower_start_layer<=28)
+	      else
 		{
-		  //cout<<"check6"<<"in the loop"<<"\t"<<i_bin<<endl;
-		  float w1 = getChi2Weights_EH(E_beam).at(0);                                                                          
-		  float w2 = getChi2Weights_EH(E_beam).at(1);                                                                         
-		  float w3 = getChi2Weights_EH(E_beam).at(2);
-		  //cout<<"check6"<<"in the loop"<<"\t"<<i_bin<<endl;
-		  float chi2_energy = w1*rechitEnergySum_EE + w2*rechitEnergySum_FH + w3*rechitEnergySum_AH + O;
-		  if(chi2_method > 0)  {
-                    if(chi2_method == 1) O = 0.4;
-                    chi2_energy = w1*EE_detscale + w2*FH_detscale + w3*AH_detscale + O;
-                  }
-
-		  hist_resp_total_1[i_bin]->Fill(chi2_energy);
-                  hist_resp_SS_EE_1[i_bin]->Fill(chi2_energy);
-		  hist_fixwt_total[i_bin]->Fill(tot_E_gev);
-                  hist_fixwt_SS_EE[i_bin]->Fill(tot_E_gev);
-
-
-		  double sigma2_EH =(0.084*0.084)*(tot_E_gev*tot_E_gev) + (1.39*1.39)*tot_E_gev;// (0.084*0.084) + (1.39*1.39)*tot_E_gev;
+		  double sigma2_EH = (0.089*0.089) + (1.39*1.39)*tot_E_gev;
 		  ROOT::Math::SMatrix<double,3, 3, ROOT::Math::MatRepStd<double,3> > coeffs_EH;
 		  ROOT::Math::SVector<double, 3> consts_EH;
 		  ROOT::Math::SVector<double, 3> values_EH;
@@ -1097,11 +745,9 @@ void AnalyzeHGCOctTB::EventLoop(const char *data, const char *energy, const char
 		    values_EH(i) = 0.0;
 		  }
 		  
-		   IsIn_en_range = (tot_E_gev > en_range_EE_xmin_vec[i_bin][Elist[i_bin]+2] && tot_E_gev < en_range_EE_xmax_vec[i_bin][Elist[i_bin]+2]);
-		   //IsIn_en_range = true;
-		   if(IsIn_en_range){
-		     if(chi2_method==0)
-		       {
+
+		  if(chi2_method==0)
+		    {
 		      coeffs_EH(0,0) = (rechitEnergySum_EE*rechitEnergySum_EE)/sigma2_EH;
 		      coeffs_EH(0,1) = (rechitEnergySum_EE*rechitEnergySum_FH)/sigma2_EH;
 		      coeffs_EH(0,2) = (rechitEnergySum_EE*rechitEnergySum_AH)/sigma2_EH;
@@ -1139,11 +785,10 @@ void AnalyzeHGCOctTB::EventLoop(const char *data, const char *energy, const char
 		      coeff_EH_vec[i_bin]+=coeffs_EH;
 		      
 		    }
-		   }
+		  
 		}
             }	         
-        }//true bin loop
-      //cout<<"check3"<<"After chi2"<<endl;
+        }//true bin loop    
       if(DEBUG) cout<<"DEBUG: End of Entry = "<<jentry<<endl;
       if(DEBUG) cout<<"DEBUG: ****************** "<<endl;
       
@@ -1154,10 +799,10 @@ void AnalyzeHGCOctTB::EventLoop(const char *data, const char *energy, const char
     } // loop over entries
   
   char* name = new char[1000];
-  sprintf(name,"chi2_calibFact_H_hadrons_flatEn_%d_scalMC_2sigma.txt",chi2_method);
+  sprintf(name,"chi2_calibFact_H_hadrons_flatEn_%d_v1.txt",chi2_method);
   std::ofstream file_H;
   file_H.open(name,ios::out);//"../txt_maps/chi2_map/chi2_calibFact_H_hadrons_flatEn_%d.txt",chi2_method,ios::out);                        
-  sprintf(name,"chi2_calibFact_EH_hadrons_flatEn_%d_scalMC_2sigma.txt",chi2_method);
+  sprintf(name,"chi2_calibFact_EH_hadrons_flatEn_%d_v1.txt",chi2_method);
   std::ofstream file_EH;
   file_EH.open(name,ios::out);//"../txt_maps/chi2_map/chi2_calibFact_EH_hadrons_flatEn_%d.txt",chi2_method,ios::out
 
@@ -1216,11 +861,7 @@ consts_H = consts_H_vec[i_en];
       if(isInverted_EH) {
         values_EH = coeffs_EH*consts_EH;
         cout<<"EH Hadrons => For E = "<<Elist[i_en]+2<<"GeV, w1 = "<<values_EH(0)<<" ;w2 = "<<values_EH(1)<<" ;w3 = "<<values_EH(2)<<";"<<endl;
-	cout<<">>>>>>> Uncertainity  : "<<sqrt(coeffs_EH(0,0))<< " " << sqrt(coeffs_EH(1,1)) << " " << sqrt(coeffs_EH(2,2))<<endl;
-
-         file_EH<<Elist[i_en]+2<<"\t"<<values_EH(0)<<"\t"<<values_EH(1)<<"\t"<<values_EH(2)<<"\t"<<sqrt(coeffs_EH(0,0))<<"\t"<<sqrt(coeffs_EH(1,1))<<"\t"<<sqrt(coeffs_EH(2,2))<<"\n";
-
-        //file_EH<<Elist[i_en]+2<<"\t"<<values_EH(0)<<"\t"<<values_EH(1)<<"\t"<<values_EH(2)<<"\n";
+        file_EH<<Elist[i_en]+2<<"\t"<<values_EH(0)<<"\t"<<values_EH(1)<<"\t"<<values_EH(2)<<"\n";
       }
       else {
         cout<<"Error: Could not invert for EH hadrons..."<<endl;
@@ -1230,11 +871,7 @@ consts_H = consts_H_vec[i_en];
         values_H = coeffs_H*consts_H;
         //cout<<"H Hadrons => For E = "<<E_beam<<"GeV, w1 = "<<values_H(0)<<" ;w2 = "<<values_H(1)<<" ;w3 = "<<values_H(2)<<";"<<endl;      
         cout<<"H Hadrons => For E = "<<Elist[i_en]+2<<"GeV, w1 = 0.0 ;w2 = "<<values_H(0)<<" ;w3 = "<<values_H(1)<<";"<<endl;
-	cout<<">>>>>>> Uncertainity  : "<<sqrt(coeffs_H(0,0)) << " " <<sqrt(coeffs_H(1,1))<<endl;
-
-        file_H<<Elist[i_en]+2<<"\t"<<0<<"\t"<<values_H(0)<<"\t"<<values_H(1)<<"\t"<<0<<"\t"<<sqrt(coeffs_H(0,0))<<"\t"<<sqrt(coeffs_H(1,1))<<"\n";
-
-        //file_H<<Elist[i_en]+2<<"\t"<<values_H(0)<<"\t"<<values_H(1)<<"\n";
+        file_H<<Elist[i_en]+2<<"\t"<<values_H(0)<<"\t"<<values_H(1)<<"\n";
       }
       else {
         cout<<"Error: Could not invert for H hadrons..."<<endl;

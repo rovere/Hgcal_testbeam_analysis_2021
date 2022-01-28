@@ -41,7 +41,7 @@ std::vector<float> getChi2Weights_EH(int beamEnergy_);
   std::map<int, std::vector<float>> chi2_weights_EH;
 std::vector<float> getChi2Weights_H(int beamEnergy_);
   std::map<int, std::vector<float>> chi2_weights_H;
-  //  float MinDr(float v1,vector<float> v2);
+
 
   std::map<int, std::vector<int>> module_map;
   std::map<int, std::pair<float,float> > align_map;

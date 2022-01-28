@@ -120,85 +120,16 @@ class AnalyzeHGCOctTB : public HGCNtupleVariables{
   TH1F* h_ssinEE;
   TH1F* h_mipsinEE;
   TDirectory* resp;
-  TDirectory* fix_wten;
-  TH1F* hist_fixwt_total[85];
-  TH1F* hist_fixwt_SS_EE[85];
-  TH1F* hist_fixwt_SS_FH[85];
-
-  TDirectory* chi2_mehtod1;
+  TDirectory* chi2_mehtod0;
+  //  TDirectory* chi2_mehtod1;
   TH1F* h_rechit_energy_FB_rel_weightScan[50];
-  TH2F* h_muo_dxvsdy;
-  TH1F* h_dR;
-  TH2F* h_muo_dxvsdy_afterCorr;
-  TH1F* h_dR_afterCorr;
+  TH1F* hist_resp_total_0[85];
+  TH1F* hist_resp_SS_EE_0[85];
+  TH1F* hist_resp_SS_FH_0[85];
+  // TH1F* hist_resp_total_1[85];
+  // TH1F* hist_resp_SS_EE_1[85];
+  // TH1F* hist_resp_SS_FH_1[85];
 
-  // 2d histograms for each energy bin
-  //histograms for muons
-  TH2F* h_xVs_trackX[3]; //at CE-E 1st, CE-H 2nd, AH 3rd
-  TH2F* h_xVs_1trackX[3];
-  TH2F* h_yVs_trackY[3];
-  TH2F* h_yVs_1trackY[3]; //done
-  //h_xVs_trackX  
-  TH2F* h_dXvsdY_EE[2]; //EE = 1,14
-  TH2F* h_dXvsdY_FH[2];  //FH = 1,6
-  TH2F* h_dXvsdY_AH[2]; //AH 1, 20
-  TH2F* h_dXvsdY_EE_Acorr[2]; //EE = 1,14
-  TH2F* h_dXvsdY_FH_Acorr[2];  //FH = 1,6                                                                                            
-  TH2F* h_dXvsdY_AH_Acorr[2]; //AH 1, 20     
-
-  TH1F* h_dX_EE[2];
-  TH1F* h_dY_EE[2];
-  TH1F* h_dX_FH[2];
-  TH1F* h_dY_FH[2];
-  TH1F* h_dX_AH[2];
-  TH1F* h_dY_AH[2];
-
-
-
-  TH2F *h_xVsy[8];
-  TH2F *h_xVsy_corr[8];
-  TH2F *h_xVsy_EE[8];
-  TH2F *h_xVsy_corr_EE[8];
-  TH2F *h_xVsy_FH[8];
-  TH2F *h_xVsy_corr_FH[8];
-  TH2F *h_xVsy_AH[8];
-  TH2F *h_xVsy_corr_AH[8];
-
-  
-  TH2F *h_xVsy_SS20_EE_l1[8];
-  TH2F *h_xVsy_SS20_EE_l14[8];
-  TH2F *h_xVsy_SS20_EE_l1_Acorr[8];
-  TH2F *h_xVsy_SS20_EE_l14_Acorr[8];
-
-  TH2F *h_xVsy_EE_l1[8];
-  TH2F *h_xVsy_EE_l14[8];
-
-  TH2F *h_xVsy_FH_l1[8];
-  TH2F *h_xVsy_FH_l6[8];
-
-  TH2F *h_xVsy_AH_l1[8];
-  TH2F *h_xVsy_AH_l20[8];
-  
-  TH2F *h_xVsy_EE_l1_Acorr[8];
-  TH2F *h_xVsy_EE_l14_Acorr[8];
-
-  TH2F *h_xVsy_FH_l1_Acorr[8];
-  TH2F *h_xVsy_FH_l6_Acorr[8];
-
-  TH2F *h_xVsy_AH_l1_Acorr[8];
-  TH2F *h_xVsy_AH_l20_Acorr[8];
-
-
-  // TH1F* hist_resp_total_0[85];
-  // TH1F* hist_resp_SS_EE_0[85];
-  // TH1F* hist_resp_SS_FH_0[85];
-  TH1F* hist_resp_total_1[85];
-  TH1F* hist_resp_SS_EE_1[85];
-  TH1F* hist_resp_SS_FH_1[85];
-  TH1F* hist_total;
-  TH1F* hist_frac_EE;
-  TH1F* hist_frac_FH;
-  TH1F* hist_frac_AH;
   
   
 };
@@ -217,144 +148,9 @@ void AnalyzeHGCOctTB::BookHistogram(const char *outFileName, const char* conf,  
   //int xbin = (xhigh-xlow)/6;
   int xbin = 200;//*0.5*en;
   ////////// Book histograms here  //////////////
-  int En_bin[8]={20,50,80,100,120,200,250,300};
-  int Xmax[3]={10,10,40};
-  int Xmin[3]={-10,-10,-40};
-  int Xbin[3]={20,20,80};
-  char hname[1000];
-  const char* compart[3]= {"EE","FH","AH"};
-  //histograms for muons
-  hist_total = new TH1F("hist_total","total rechits",1000,0,2000);
-  hist_frac_EE = new TH1F("hist_frac_EE","",500, 0,500);
-  hist_frac_FH=new TH1F("hist_frac_FH","",50, 0,50);
-  hist_frac_AH=new TH1F("hist_frac_AH","",50, 0,50);
-
-
-  for(int ibin=0;ibin<3;ibin++)
-    {
-      
-      sprintf(hname,"h_xVs_trackX_%s",compart[ibin]);
-      h_xVs_trackX[ibin]= new TH2F(hname, hname, 20,-10,10,Xbin[ibin],Xmin[ibin],Xmax[ibin]);//,10,-10,10);//Xmin[ibin],Xmax[ibin],80,Xmin[ibin],Xmax[ibin]);
-      sprintf(hname,"h_xVs_1trackX_%s",compart[ibin]);
-      h_xVs_1trackX[ibin]= new TH2F(hname, hname,20,-10,10, Xbin[ibin],Xmin[ibin],Xmax[ibin]);//,10,-10,10);//80,Xmin[ibin],Xmax[ibin],80,Xmin[ibin],Xmax[ibin]);
-      sprintf(hname,"h_yVs_trackX_%s",compart[ibin]);
-      h_yVs_trackY[ibin]= new TH2F(hname, hname, 20,-10,10,Xbin[ibin],Xmin[ibin],Xmax[ibin]);//,10,-10,10);//80,Xmin[ibin],Xmax[ibin],80,Xmin[ibin],Xmax[ibin]);
-      sprintf(hname,"h_yVs_1trackX_%s",compart[ibin]);
-      h_yVs_1trackY[ibin]= new TH2F(hname, hname,20,-10,10, Xbin[ibin],Xmin[ibin],Xmax[ibin]);//,10,-10,10);//80,Xmin[ibin],Xmax[ibin],80,Xmin[ibin],Xmax[ibin]);          
-    }
-  const char* lay_EE[2]={"layer1","layer14"};
-  const	char* lay_FH[2]={"layer1","layer6"};
-  const	char* lay_AH[2]={"layer1","layer20"};
-  int xmax[3]={20,20,20};
-  int xmin[3]={-20,-20,-20};
-
-  for(int ibin=0;ibin<2;ibin++)
-    {
-      
-      sprintf(hname,"h_dXvsdY_%s_%s",compart[0],lay_EE[ibin]);
-      h_dXvsdY_EE[ibin]= new TH2F(hname, hname, 80,xmin[ibin],xmax[ibin],80,xmin[ibin],xmax[ibin]);
-      sprintf(hname,"h_dXvsdY_%s_%s",compart[1],lay_FH[ibin]);
-      h_dXvsdY_FH[ibin]= new TH2F(hname, hname, 80,xmin[ibin],xmax[ibin],80,xmin[ibin],xmax[ibin]);
-      sprintf(hname,"h_dXvsdY_%s_%s",compart[2],lay_AH[ibin]);
-      h_dXvsdY_AH[ibin]= new TH2F(hname, hname, 80,xmin[ibin],xmax[ibin],80,xmin[ibin],xmax[ibin]);
-
-      sprintf(hname,"h_dXvsdY_Acorr_%s_%s",compart[0],lay_EE[ibin]);
-      h_dXvsdY_EE_Acorr[ibin]= new TH2F(hname, hname, 80,xmin[ibin],xmax[ibin],80,xmin[ibin],xmax[ibin]);
-      sprintf(hname,"h_dXvsdY_Acorr_%s_%s",compart[1],lay_FH[ibin]);
-      h_dXvsdY_FH_Acorr[ibin]= new TH2F(hname, hname, 80,xmin[ibin],xmax[ibin],80,xmin[ibin],xmax[ibin]);
-      sprintf(hname,"h_dXvsdY_Acorr_%s_%s",compart[2],lay_AH[ibin]);
-      h_dXvsdY_AH_Acorr[ibin]= new TH2F(hname, hname, 80,xmin[ibin],xmax[ibin],80,xmin[ibin],xmax[ibin]);
-
-      sprintf(hname,"h_dX_%s_%s",compart[0],lay_EE[ibin]);
-      h_dX_EE[ibin] = new TH1F(hname, hname, 80,xmin[ibin],xmax[ibin]);
-      sprintf(hname,"h_dY_%s_%s",compart[0],lay_EE[ibin]);
-      h_dY_EE[ibin] = new TH1F(hname, hname, 80,xmin[ibin],xmax[ibin]);
-      sprintf(hname,"h_dX_%s_%s",compart[1],lay_FH[ibin]);
-      h_dX_FH[ibin] = new TH1F(hname, hname, 80,xmin[ibin],xmax[ibin]);
-      sprintf(hname,"h_dY_%s_%s",compart[1],lay_FH[ibin]);
-      h_dY_FH[ibin] = new TH1F(hname, hname, 80,xmin[ibin],xmax[ibin]);
-
-      sprintf(hname,"h_dX_%s_%s",compart[2],lay_AH[ibin]);
-      h_dX_AH[ibin] = new TH1F(hname, hname, 80,xmin[ibin],xmax[ibin]);
-      sprintf(hname,"h_dY_%s_%s",compart[2],lay_AH[ibin]);
-      h_dY_AH[ibin] = new TH1F(hname, hname, 80,xmin[ibin],xmax[ibin]);
-
-
-			       
-    }
-  
-  
-  for(int ibin=0;ibin<8;ibin++)
-    {
-      sprintf(hname,"h_xVsy_beforeCorr_%d",En_bin[ibin]);
-      h_xVsy[ibin] = new TH2F(hname, hname, 80,-40,40,80,-40,40);
-      sprintf(hname,"h_xVsy_AfterCorr_%d",En_bin[ibin]);
-      h_xVsy_corr[ibin]=new TH2F(hname, hname, 80,-40,40,80,-40,40);
-
-      sprintf(hname,"h_xVsy_beforeCorr_EE_%d",En_bin[ibin]);
-      h_xVsy_EE[ibin] = new TH2F(hname, hname, 80,-40,40,80,-40,40);
-      sprintf(hname,"h_xVsy_AfterCorr_EE_%d",En_bin[ibin]);
-      h_xVsy_corr_EE[ibin]=new TH2F(hname, hname, 80,-40,40,80,-40,40);
-
-       sprintf(hname,"h_xVsy_beforeCorr_FH_%d",En_bin[ibin]);
-      h_xVsy_FH[ibin] = new TH2F(hname, hname, 80,-40,40,80,-40,40);
-      sprintf(hname,"h_xVsy_AfterCorr_FH_%d",En_bin[ibin]);
-      h_xVsy_corr_FH[ibin]=new TH2F(hname, hname, 80,-40,40,80,-40,40);
-       sprintf(hname,"h_xVsy_beforeCorr_AH_%d",En_bin[ibin]);
-      h_xVsy_AH[ibin] = new TH2F(hname, hname, 80,-40,40,80,-40,40);
-      sprintf(hname,"h_xVsy_AfterCorr_AH_%d",En_bin[ibin]);
-      h_xVsy_corr_AH[ibin]=new TH2F(hname, hname, 80,-40,40,80,-40,40);
-      
-      sprintf(hname,"h_xVsy_SS20_EE_l1_%d",En_bin[ibin]);
-      h_xVsy_SS20_EE_l1[ibin]= new TH2F(hname, hname, 80,-10,10,80,-10,10);
-      sprintf(hname,"h_xVsy_SS20_EE_l14_%d",En_bin[ibin]);
-      h_xVsy_SS20_EE_l14[ibin]= new TH2F(hname, hname, 80,-10,10,80,-10,10);
-      sprintf(hname,"h_xVsy_SS20_EE_l1_Acorr_%d",En_bin[ibin]);
-      h_xVsy_SS20_EE_l1_Acorr[ibin]= new TH2F(hname, hname, 80,-10,10,80,-10,10);
-      sprintf(hname,"h_xVsy_SS20_EE_l14_Acorr_%d",En_bin[ibin]);
-      h_xVsy_SS20_EE_l14_Acorr[ibin]= new TH2F(hname, hname, 80,-10,10,80,-10,10);
-
-
-      sprintf(hname,"h_xVsy_EE_l1_%d",En_bin[ibin]);
-      h_xVsy_EE_l1[ibin]= new TH2F(hname, hname, 80,-40,40,80,-40,40);
-      sprintf(hname,"h_xVsy_EE_l14_%d",En_bin[ibin]);
-      h_xVsy_EE_l14[ibin]= new TH2F(hname, hname, 80,-40,40,80,-40,40);
-      sprintf(hname,"h_xVsy_EE_l1_Acorr_%d",En_bin[ibin]);
-      h_xVsy_EE_l1_Acorr[ibin]= new TH2F(hname, hname, 80,-40,40,80,-40,40);
-      sprintf(hname,"h_xVsy_EE_l14_Acorr_%d",En_bin[ibin]);
-      h_xVsy_EE_l14_Acorr[ibin]= new TH2F(hname, hname, 80,-40,40,80,-40,40);
-
-       sprintf(hname,"h_xVsy_FH_l1_%d",En_bin[ibin]);
-      h_xVsy_FH_l1[ibin]= new TH2F(hname, hname, 80,-40,40,80,-40,40);
-      sprintf(hname,"h_xVsy_FH_l6_%d",En_bin[ibin]);
-      h_xVsy_FH_l6[ibin]= new TH2F(hname, hname, 80,-40,40,80,-40,40);
-      sprintf(hname,"h_xVsy_FH_l1_Acorr_%d",En_bin[ibin]);
-      h_xVsy_FH_l1_Acorr[ibin]= new TH2F(hname, hname, 80,-40,40,80,-40,40);
-      sprintf(hname,"h_xVsy_FH_l6_Acorr_%d",En_bin[ibin]);
-      h_xVsy_FH_l6_Acorr[ibin]= new TH2F(hname, hname, 80,-40,40,80,-40,40);
-
-      sprintf(hname,"h_xVsy_AH_l1_%d",En_bin[ibin]);
-      h_xVsy_AH_l1[ibin]= new TH2F(hname, hname, 80,-40,40,80,-40,40);
-      sprintf(hname,"h_xVsy_AH_l20_%d",En_bin[ibin]);
-      h_xVsy_AH_l20[ibin]= new TH2F(hname, hname, 80,-40,40,80,-40,40);
-      sprintf(hname,"h_xVsy_AH_l1_Acorr_%d",En_bin[ibin]);
-      h_xVsy_AH_l1_Acorr[ibin]= new TH2F(hname, hname, 80,-40,40,80,-40,40);
-      sprintf(hname,"h_xVsy_AH_l20_Acorr_%d",En_bin[ibin]);
-      h_xVsy_AH_l20_Acorr[ibin]= new TH2F(hname, hname, 80,-40,40,80,-40,40);
-
-      
-
-
-    }
-  h_muo_dxvsdy= new TH2F("h_muo_dxvsdy","dX vs dY",200,-20,20,200,-20,20);
-  h_dR = new TH1F("h_dR","sqrt(dx,dy)",500,0,10);
-
- h_muo_dxvsdy_afterCorr= new TH2F("h_muo_dxvsdy_afterCorr","dX vs dY after correc",200,-20,20,200,-20,20);
- h_dR_afterCorr = new TH1F("h_dR_afterCorr","sqrt(dx,dy) after correc",500,0,10);
-
    const char *baseline[6]= {"Nocut","FH-noisy","Good-track","MuonVeto","pres-shower","track-impact"};//,"dPhi_Met","Met_100","Met_250","Met_600","st_300_Met100","pt_st_Met_250","st_300_Met250","nocut"};
   char name[100],title[100];
-  char hname2[1000],hname1[1000], hname1_2d[1000];
+  char hname[1000],hname1[1000], hname1_2d[1000];
   for(int i=0;i<6;i++)
     {
       cout<<baseline[i]<<endl;
@@ -367,38 +163,31 @@ int Elist[85] =  {10, 14 , 18 , 22 , 26 , 30,  34 , 38 , 42,  46,  50,  54,  58,
                      226, 230, 234 ,238, 242 ,246 ,250, 254, 258 ,262 ,266, 270, 274, 278, 282, 286, 290, 294,
                      298, 302 ,306, 310, 314, 318 ,322, 326, 330, 334 ,338 ,342 ,346};
 
- chi2_mehtod1 =oFile->mkdir("chi2_mehtod0");
+ chi2_mehtod0 =oFile->mkdir("chi2_mehtod0");
  //chi2_mehtod1 =oFile->mkdir("chi2_mehtod1");
    for(int i = 0; i < 85; i++) {
      char* temp = new char[100];
      double xmin = -1;
-     double xmax = 10*Elist[i];
+     double xmax = 6*Elist[i];
      double xbin = 700;
-     
-     // chi2_mehtod0->cd();
-     // sprintf(temp,"Sim_chi2_method0_TrueEn_%d_to_%d",Elist[i],Elist[i+1]);
-     // hist_resp_total_0[i]= new TH1F(temp,temp,xbin,0,xmax);
-     // sprintf(temp,"Sim_chi2_method0_TrueEn_%d_to_%d_SS_EE",Elist[i],Elist[i+1]);
-     // hist_resp_SS_EE_0[i] = new TH1F(temp,temp,xbin,0,xmax);
-     // sprintf(temp,"Sim_chi2_method0_TrueEn_%d_to_%d_SS_FH",Elist[i],Elist[i+1]);
-     // hist_resp_SS_FH_0[i] = new TH1F(temp,temp,xbin,0,xmax);
+     chi2_mehtod0->cd();
+     sprintf(temp,"Sim_chi2_method0_TrueEn_%d_to_%d",Elist[i],Elist[i+1]);
+     hist_resp_total_0[i]= new TH1F(temp,temp,xbin,0,xmax);
+     sprintf(temp,"Sim_chi2_method0_TrueEn_%d_to_%d_SS_EE",Elist[i],Elist[i+1]);
+     hist_resp_SS_EE_0[i] = new TH1F(temp,temp,xbin,0,xmax);
+     sprintf(temp,"Sim_chi2_method0_TrueEn_%d_to_%d_SS_FH",Elist[i],Elist[i+1]);
+     hist_resp_SS_FH_0[i] = new TH1F(temp,temp,xbin,0,xmax);
 
-     chi2_mehtod1->cd();
+     // chi2_mehtod1->cd();
 
-     sprintf(temp,"Sim_chi2_method1_TrueEn_%d_to_%d",Elist[i],Elist[i+1]);
-     hist_resp_total_1[i]= new TH1F(temp,temp,xbin,0,xmax);
-     sprintf(temp,"Sim_chi2_method1_TrueEn_%d_to_%d_SS_EE",Elist[i],Elist[i+1]);
-     hist_resp_SS_EE_1[i] = new TH1F(temp,temp,xbin,0,xmax);
-     sprintf(temp,"Sim_chi2_method1_TrueEn_%d_to_%d_SS_FH",Elist[i],Elist[i+1]);
-     hist_resp_SS_FH_1[i] = new TH1F(temp,temp,xbin,0,xmax);
-     sprintf(temp,"Sim_fixwt_method1_TrueEn_%d_to_%d",Elist[i],Elist[i+1]);
-     hist_fixwt_total[i]= new TH1F(temp,temp,xbin,0,xmax);
-     sprintf(temp,"Sim_fixwt_method1_TrueEn_%d_to_%d_SS_EE",Elist[i],Elist[i+1]);
-     hist_fixwt_SS_EE[i] = new TH1F(temp,temp,xbin,0,xmax);
-     sprintf(temp,"Sim_fixwt_method1_TrueEn_%d_to_%d_SS_FH",Elist[i],Elist[i+1]);
-     hist_fixwt_SS_FH[i] = new TH1F(temp,temp,xbin,0,xmax);
+     // sprintf(temp,"Sim_chi2_method1_TrueEn_%d_to_%d",Elist[i],Elist[i+1]);
+     // hist_resp_total_1[i]= new TH1F(temp,temp,xbin,0,xmax);
+     // sprintf(temp,"Sim_chi2_method1_TrueEn_%d_to_%d_SS_EE",Elist[i],Elist[i+1]);
+     // hist_resp_SS_EE_1[i] = new TH1F(temp,temp,xbin,0,xmax);
+     // sprintf(temp,"Sim_chi2_method1_TrueEn_%d_to_%d_SS_FH",Elist[i],Elist[i+1]);
+     // hist_resp_SS_FH_1[i] = new TH1F(temp,temp,xbin,0,xmax);
 
-     }
+   }
    
    //   char* hname = new char[2000];
    for(int i = 0; i < 50; i++) {
@@ -467,7 +256,7 @@ void AnalyzeHGCOctTB::Alignment_Map_Init() {
   /// Alignment map for config 1, it needs to be changed accorfing to configurations
   
   char* f_name = new char[200];
-  sprintf(f_name,"./config_maps/Alignment_Map.txt");
+  sprintf(f_name,"../../Alignment_Map.txt");
   std::ifstream in(f_name);
   //int layer;
   if(!in) {
@@ -494,7 +283,7 @@ void AnalyzeHGCOctTB::Noise_Map_Init() {
   //Noise map for config - 1 , needs to be changed accordingly
   
   char* f_name = new char[200];
-  sprintf(f_name,"./config_maps/Noise_Map.txt");
+  sprintf(f_name,"../../Noise_Map.txt");
   std::ifstream in(f_name);
   
   if(!in) {
@@ -518,19 +307,19 @@ void AnalyzeHGCOctTB::moduleMap_init(const char* config) {
   char *f_name = new char[200];
 
   if(strcmp(config,"alpha")==0 || strcmp(config,"config1")==0) {
-    sprintf(f_name,"../config_maps/moduleMAP_config1.txt");
+    sprintf(f_name,"../../config_maps/moduleMAP_config1.txt");
     cout<<"\n\nINFO: Mapping module configuration ALPHA (oct10-oct17) "<<endl;
     cout<<"INFO: Mapping EE[0]/FH[1]::Layer #[1-40]::Position on Layer[0 for EE]&[1-7 for FH] consult figure for Daisy structure configuration!!!"<<endl;
 
   }
   else if(strcmp(config,"bravo")==0 || strcmp(config,"config2")==0) {
-    sprintf(f_name,"./config_maps/moduleMAP_config2.txt");
+    sprintf(f_name,"../../config_maps/moduleMAP_config2.txt");
     cout<<"\n\nINFO: Mapping module configuration BRAVO (17oct-22oct) "<<endl;
     cout<<"INFO: Mapping EE[0]/FH[1]::Layer #[1-40]::Position on Layer[0 for EE]&[1-7 for FH] consult figure for Daisy structure configuration!!!"<<endl;
 
   }
   else if(strcmp(config,"charlie")==0  || strcmp(config,"config3")==0) {
-    sprintf(f_name,"./config_maps/moduleMAP_config3.txt");
+    sprintf(f_name,"../../config_maps/moduleMAP_config3.txt");
     cout<<"\n\nINFO: Mapping module configuration CHARLIE (23Oct-4Nov) "<<endl;
     cout<<"INFO: Mapping EE[0]/FH[1]::Layer #[1-40]::Position on Layer[0 for EE]&[1-7 for FH] consult figure for Daisy structure configuration!!!"<<endl;
 
@@ -572,7 +361,7 @@ void AnalyzeHGCOctTB::layerPosition_init() {
   // Layer postions for config - 1, needs to be changed accordingly for other configs
   
   char *f_name = new char[200];
-  sprintf(f_name,"./config_maps/config1_lengths.txt");
+  sprintf(f_name,"../../config1_lengths.txt");
 
   std::ifstream in(f_name);
   if(!in) {
@@ -601,7 +390,29 @@ void AnalyzeHGCOctTB::layerPosition_init() {
 }
 
 
+AnalyzeHGCOctTB::AnalyzeHGCOctTB(const TString &inputFileList, const char *outFileName, const char* dataset, const char* config, const char* energy,const char* min_, const char* max_) {
 
+  TChain *tree = new TChain("pion_variables");
+  // TChain *tree2 = new TChain("trackimpactntupler/impactPoints");
+  // TChain *tree3 = new TChain("bigtree");
+
+
+  if( ! FillChain(tree, inputFileList) ) {
+    std::cerr << "Cannot get the tree " << std::endl;
+  } else {
+    std::cout << "Initiating analysis of dataset " << dataset << std::endl;
+  }
+
+  int chi2_method= atoi(energy);
+  HGCNtupleVariables::Init(tree);//, tree2, tree3);
+  //  HGCNtupleVariables::init_piTree();
+  BookHistogram(outFileName, config, energy);
+  moduleMap_init(config);
+  Alignment_Map_Init();
+  Noise_Map_Init();
+  layerPosition_init();
+  Chi2_Weight_Map_Init(chi2_method);  
+}
 void AnalyzeHGCOctTB::Chi2_Weight_Map_Init(int chi2_method) {
   char *f_name_EH = new char[2000];
   char *f_name_H = new char[2000];
@@ -615,8 +426,8 @@ void AnalyzeHGCOctTB::Chi2_Weight_Map_Init(int chi2_method) {
   case 3 : sprintf(method,"%d : detector scale with offset (0.4 GeV) for H hadrons AND events around the core of beam energy as input to chi2",chi2_method);  break;
   default : cout<<"Incorrect method input use between 0-3"<<endl; exit(0);
 }
-  sprintf(f_name_EH,"./txt_maps/chi2_flatEn/sim/chi2_calibFact_EH_hadrons_flatEn_%d_scalMC_2sigma.txt",chi2_method);
-  sprintf(f_name_H,"./txt_maps/chi2_flatEn/sim/chi2_calibFact_H_hadrons_flatEn_%d_scalMC_2sigma.txt",chi2_method);
+  sprintf(f_name_EH,"./chi2_calibFact_EH_hadrons_flatEn_%d_v1.txt",chi2_method);
+  sprintf(f_name_H,"./chi2_calibFact_H_hadrons_flatEn_%d_v1.txt",chi2_method);
 
 
 
@@ -633,10 +444,10 @@ void AnalyzeHGCOctTB::Chi2_Weight_Map_Init(int chi2_method) {
     exit(0);
   }
 int beamEnergy;
- float  w1, w2, w3,ew1,ew2,ew3;
+  float  w1, w2, w3;
 
   cout<<"File name = "<<f_name_EH<<endl;
-  while(in_EH>>beamEnergy>>w1>>w2>>w3>>ew1>>ew2>>ew3){
+  while(in_EH>>beamEnergy>>w1>>w2>>w3){
     std::pair<int, std::vector<float>> temp_pair;
     std::vector<float> temp_vector;
     temp_vector.push_back(w1);
@@ -648,11 +459,11 @@ int beamEnergy;
     chi2_weights_EH.insert(temp_pair);
   }
   cout<<BOLDGREEN<<"INFO: Chi2 calibration Map initialized for EH hadrons!! "<<RESET<<endl;
-  beamEnergy = -1.0; w1 = -1.0; w2 = -1.0; w3 = -1.0;
+beamEnergy = -1.0; w1 = -1.0; w2 = -1.0; w3 = -1.0;
 
 
   cout<<"File name = "<<f_name_H<<endl;
-  while(in_H>>beamEnergy>>w1>>w2>>w3>>ew1>>ew2>>ew3){
+  while(in_H>>beamEnergy>>w1>>w2>>w3){
     std::pair<int, std::vector<float>> temp_pair;
     std::vector<float> temp_vector;
     temp_vector.push_back(w1);
@@ -667,24 +478,7 @@ int beamEnergy;
 
   cout<<BOLDGREEN<<"INFO: Chi2 minimization method used =>  "<<method<<RESET<<endl<<endl;
 
-  cout<<chi2_weights_H.size()<<"\t"<<chi2_weights_EH.size()<<endl;
-}
-AnalyzeHGCOctTB::AnalyzeHGCOctTB(const TString &inputFileList, const char *outFileName, const char* dataset, const char* config, const char*energy,const char* min_, const char* max_) {
-  TChain *tree = new TChain("pion_variables");
-  if( ! FillChain(tree, inputFileList) ) {
-    std::cerr << "Cannot get the tree " << std::endl;
-  } else {
-    std::cout << "Initiating analysis of dataset " << dataset << std::endl;
-  }
 
-  int chi2_method= atoi(energy);
-  HGCNtupleVariables::Init(tree);//, tree2, tree3);                                                                                         
-  BookHistogram(outFileName, config, energy);
-  moduleMap_init(config);
-  Alignment_Map_Init();
-  Noise_Map_Init();
-  layerPosition_init();
-  Chi2_Weight_Map_Init(chi2_method);
 }
 
 

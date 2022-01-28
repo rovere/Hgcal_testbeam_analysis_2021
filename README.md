@@ -4,7 +4,7 @@ HGCAL_analysis_code
 Latest pion analysis code for OctTB2018
 
 
-git clone -b Alignment_corr git@github.com:alpana-hep/Hgcal_testbeam_analysis_2021.git .
+git clone -b chi2_optimization git@github.com:alpana-hep/Hgcal_testbeam_analysis_2021.git .
 How to run the script
 
 make

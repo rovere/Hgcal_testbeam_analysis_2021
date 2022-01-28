@@ -76,15 +76,7 @@ std::pair<float,float> HGCNtupleVariables::dxy_alignment(int layer) {
   }
   return temp_dXY;
 }
-// double HGCNtupleVariables::MinDr(float v1,vector<float> v2)
-// {
-//   double dr = 60;
-//   for(int j=0;j<v2.size();j++)
-//     { if(dr>=v1.DeltaR(v2[j]))
-// 	{ dr = v1.DeltaR(v2[j]);}
-//     }
-//   return dr;
-// }
+
 float HGCNtupleVariables::getNoise(std::pair<int,int> mod_chip) {
   float temp_noise = -1.0;
   std::map<std::pair<int,int>, float >::iterator it = noise_map.find(mod_chip);
