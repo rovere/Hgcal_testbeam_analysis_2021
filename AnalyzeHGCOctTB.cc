@@ -104,6 +104,9 @@ void AnalyzeHGCOctTB::EventLoop(const char *data, const char *energy, const char
   float alpha_ = FH_AH_relative_scale;
   float EE_scale = 94.624; //MIPs per Ge
   float FH_AH_scale = 12.788; //MIPs per GeV
+ float ee_rescaling = 1.035;
+  float fh_rescaling = 1.095;
+  float ah_rescaling = 1.095;
   
   char* outFileName = new char[1000];
   sprintf(outFileName,"./skimmed_ntuple_%s_config22_pions_temp_combinedHgc_Ahc_v46.root", data);//,Min_, Max_);
@@ -462,7 +465,7 @@ void AnalyzeHGCOctTB::EventLoop(const char *data, const char *energy, const char
 	    {
 	      h_rechits_mips_EE->Fill(energy);
 	      h_rechits_GeV_EE->Fill(energy*0.0105);
-	      Esum_rechits_EE+=energy;
+	      Esum_rechits_EE+=(energy/ee_rescaling);
 	      rechits_EE++;
 	    }
 	  else
@@ -470,7 +473,8 @@ void AnalyzeHGCOctTB::EventLoop(const char *data, const char *energy, const char
 	      h_rechits_mips_FH->Fill(energy);
               h_rechits_GeV_FH->Fill(energy*0.0789);
 
-	    Esum_rechits_FH+=energy;
+	      Esum_rechits_FH+=(energy/fh_rescaling);
+;
 	    rechits_FH++;
 	    }
   	  } //Nrechits loop
@@ -554,7 +558,7 @@ void AnalyzeHGCOctTB::EventLoop(const char *data, const char *energy, const char
 	pi_combined_rechit_z.push_back(ahc_hitZ->at(i)+offset);
 	nAhc++;
 	nrechits++;
-	Esum_rechits_AH+=ahc_hitEnergy->at(i);
+	Esum_rechits_AH+=(ahc_hitEnergy->at(i)/ah_rescaling);
 	h_rechits_mips_AH->Fill(ahc_hitEnergy->at(i));
 	
 	h_rechits_GeV_AH->Fill(ahc_hitEnergy->at(i)*0.0316);
@@ -573,7 +577,7 @@ void AnalyzeHGCOctTB::EventLoop(const char *data, const char *energy, const char
 		pi_comb_rechit_x_trimAhcal.push_back(recx);
 		pi_comb_rechit_y_trimAhcal.push_back(recy);
 		pi_comb_rechit_z_trimAhcal.push_back(ahc_hitZ->at(i)+offset);
-		rechitEnergySum_AH+=ahc_hitEnergy->at(i);
+		rechitEnergySum_AH+=(ahc_hitEnergy->at(i)/ah_rescaling);
 		nrechit_trimAhcal++;
 		count++;
 		
