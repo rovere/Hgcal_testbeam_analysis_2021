@@ -4,7 +4,7 @@ HGCAL_analysis_code
 Latest pion analysis code for OctTB2018
 
 
-git clone -b chi2_optimization git@github.com:alpana-hep/Hgcal_testbeam_analysis_2021.git .
+git clone -b updated_chi2Optimization2022 git@github.com:alpana-hep/Hgcal_testbeam_analysis_2021.git .
 How to run the script
 
 make
@@ -22,7 +22,7 @@ alwyas use chi2 method -case-1
 
 
 Example:
-`./analyzeHGCOctTB file_list/v16_v8/pion100_config1.txt outFileName.root data alpha 1 
+`./analyzeHGCOctTB file_list/skimmed_ntuples_0to1M.txt outFileName.root data alpha 1 
 How to run the script for sim:
 
 ./analyzeHGCOctTB file_list/v16_v8/<sim_file.txt> outFileName.root sim alpha 1 
