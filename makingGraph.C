@@ -1,0 +1,204 @@
+#include <stdio.h>
+#include<fstream>
+#include <vector>
+#include <string>
+#include <map>
+#include<iostream>
+using namespace std;
+void makingGraph()
+{
+   char* hname = new char[200];
+   char* hname1 = new char[200];
+   char* hname2 = new char[200];
+ char* hist_name  = new char[200];
+  char* hist_name1 = new char[200];
+  char* hist_name2 = new char[200];
+char* full_path = new char[2000];
+  char* full_path1 = new char[2000];
+  char* full_path2 = new char[2000];
+  char* path2 = new char[2000];
+  char* title= new char[2000];
+
+  char* full_path3 = new char[2000];
+  char* full_path4 = new char[2000];
+  char* full_path5 = new char[2000];
+  char* full_path6 = new char[2000];
+  char* full_path7 = new char[2000];
+  char* full_path8 = new char[2000];
+  char* full_path9 = new char[2000];
+  char* full_path10 = new char[2000];
+  char* full_path11= new char[2000];
+  sprintf(path2,"Results/");
+  TFile* file = new TFile("PionResFixwt_trimAHcal_updatewt_21April22.root","RECREATE");
+  //  const char *file_list[4] = {"chi2_calibFact_EH_hadrons_flatEn_0_v1.txt","chi2_calibFact_EH_hadrons_flatEn_1_v1.txt","chi2_calibFact_H_hadrons_flatEn_0_v1.txt","chi2_calibFact_H_hadrons_flatEn_1_v1.txt"};
+   
+  const char *file_list[3] = {"./txt_maps/chi2_calibFact_EH_hadrons_flatEn_1_trimAhcal_v1.txt","./txt_maps/chi2_calibFact_H_hadrons_flatEn_1_trimAhcal_v1.txt","./txt_maps/chi2_calibFact_H_hadrons_flatEn_2_FullAhcal_v1.txt"};
+
+  const char *data[4]={"EH_DownScale","EH_offset","H_DownScale","H_offset"};
+  const char *weight[3]={"w1","w2","w3"};
+  char* name = new char[1000];
+  sprintf(name,"parametres_weights_v1.txt");
+  std::ofstream file_H;
+  file_H.open(name,ios::out);
+
+  for(int i=0;i<1;i++)
+    {
+      int count=0;
+      sprintf(hname,"W1_%s",data[i]);//file_list[i]);      
+      TGraphErrors* h_w1 = new TGraphErrors();
+      h_w1->SetName(hname);
+
+      sprintf(hname1,"W2_%s",data[i]);//file_list[i]);
+      TGraphErrors* h_w2 = new TGraphErrors();
+      h_w2->SetName(hname1);
+      
+      sprintf(hname2,"W3_%s",data[i]);//file_list[i]);
+      TGraphErrors* h_w3 = new TGraphErrors();
+      h_w3->SetName(hname2);
+      sprintf(hname,"%s",file_list[i]);   
+      std::fstream mapping_file;
+      mapping_file.open(hname,ios::in);
+      
+      if(!mapping_file.is_open())
+        {
+          std::cout << " file not opened" << std::endl;
+        }
+      else
+        {
+	  // if(i==1)
+	  //   {
+	      while (true) {
+		int energy;
+		float w1, w2, w3,ew1=0,ew2=0,ew3=0;
+		mapping_file >> energy >>w1>>w2>>w3>>ew1>>ew2>>ew3;//res >>err_en>>err_res;
+		if (mapping_file.eof()) break;
+		h_w1->SetPoint(count,energy,w1);
+		h_w2->SetPoint(count,energy,w2);
+		h_w3->SetPoint(count,energy,w3);
+		h_w1->SetPointError(count,0,ew1);
+                h_w2->SetPointError(count,0,ew2);
+                h_w3->SetPointError(count,0,ew3);
+
+		count++;
+	      }	      
+	      //}
+	  // else
+	  //   {
+	    //   while (true) {
+            //     int energy;
+            //     float w1, w2, w3,ew1,ew2,ew3;
+            //     mapping_file >> energy >>w1>>w2>>w3>>ew1>>ew2>>ew3;//>>w3;//res >>err_en>>err_res;                                                                
+            //     if (mapping_file.eof()) break;
+	    // 	//h_w1->SetPoint(count,energy,w1);
+	    // 	h_w2->SetPoint(count,energy,w2);
+	    // 	h_w3->SetPoint(count,energy,w3);
+	    // 	//h_w1->SetPointError(count,energy,ew1);
+            //     h_w2->SetPointError(count,0,ew2);
+            //     h_w3->SetPointError(count,0,ew3);
+
+	    // 	count++;
+            //   }
+	    // }
+	  
+        }
+      TCanvas *Canvas_n2 = new TCanvas(hist_name, hist_name,900,700);//,1400,1400);
+      Canvas_n2->Range(-60.25,-0.625,562.25,0.625);
+      Canvas_n2->SetFillColor(0);
+      Canvas_n2->SetBorderMode(0);
+      Canvas_n2->SetBorderSize(2);
+      Canvas_n2->SetGrid();
+      h_w1->SetMarkerColorAlpha(kBlue, 0.95);
+      h_w1->SetMarkerSize(1.5);
+      h_w1->SetMarkerStyle(8);
+      //      TF1* f_EH_w1 = new TF1("f_EH_w1","sqrt([0]*[0]+[1]*[1]/x)",10,300);
+	TF1* f_EH_w1 = new TF1("f_EH_w1","sqrt([0]*[0]+[1]/x)+[2]/x+[3]",10,350);
+      gStyle->SetOptStat(1);
+      gStyle->SetOptFit(1);
+      h_w1->GetXaxis()->SetTitle("w1");
+      // f_EH_w1->SetParameter(0,1.189897);
+      // f_EH_w1->SetParameter(1,5.215187);
+
+      h_w1->Fit("f_EH_w1","R");
+      h_w1->Draw("ALP");
+      h_w1->GetFunction("f_EH_w1")->SetLineColor(kRed);
+      TF1* f3 = h_w1->GetFunction("f_EH_w1");
+      f3->SetRange(10,350);
+      file_H<<f3->GetParameter(0)<<"\t"<<f3->GetParameter(1)<<"\t"<<f3->GetParameter(2)<<"\t"<<f3->GetParameter(3)<<"\n";//endl;
+      f3->Draw("same");
+      Canvas_n2->Modified();
+      Canvas_n2->cd();
+      sprintf(full_path2,"%s/w1_%s_chi2_method_%s.png",path2,data[i],file_list[i]);
+      Canvas_n2->SetSelected(Canvas_n2);
+      Canvas_n2->SaveAs(full_path2);
+      h_w2->SetMarkerColorAlpha(kBlue, 0.95);
+      h_w2->SetMarkerSize(1.5);
+      h_w2->SetMarkerStyle(8);
+      // if(i==0)
+      // 	h_w2->SetMaximum(0.1);
+      // else if(i==1)
+      //   h_w2->SetMaximum(1.3);
+      // else if(i==2)	
+      //   h_w2->SetMaximum(0.14);
+      // else if(i==3)
+      //   h_w2->SetMaximum(1.3);
+      h_w2->GetXaxis()->SetTitle("w2");
+      //f_EH_w1->SetParameters(1,3);
+      // if(i<2)
+      //      TF1* f_H_w2 = new TF1("f_H_w2","sqrt([0]*[0]+[1]*[1]/x)+exp(-[2]*x+[3])",10,350);
+      // else
+       TF1* f_H_w1 = new TF1("f_H_w1","sqrt([0]*[0]+[1]/x)+[2]",20,300);
+       TF1* f_H_w2 = new TF1("f_H_w2","sqrt([0]*[0]+[1]/x)+[2]/x+[3]",30,350); // EH-w2sqrt([0]*[0]+[1]/x)+[2]/x+[3]
+      f_H_w2->SetRange(10,300);
+      
+      h_w2->Fit("f_H_w2","R");
+      h_w2->Draw("ALP");
+      h_w2->GetFunction("f_H_w2")->SetLineColor(kRed);
+      f3 = h_w2->GetFunction("f_H_w2");
+      f3->SetRange(10,350);
+      file_H<<f3->GetParameter(0)<<"\t"<<f3->GetParameter(1)<<"\t"<<f3->GetParameter(2)<<"\t"<<f3->GetParameter(3)<<"\n";//endl;
+
+      f3->Draw("same");
+
+      Canvas_n2->Modified();
+      Canvas_n2->cd();
+      sprintf(full_path2,"%s/w2_%s_chi2_method_%s.png",path2,data[i],file_list[i]);
+      Canvas_n2->SetSelected(Canvas_n2);
+      Canvas_n2->SaveAs(full_path2);
+      h_w3->SetMarkerColorAlpha(kBlue, 0.95);
+      h_w3->SetMarkerSize(1.5);
+      h_w3->SetMarkerStyle(8);
+      // if(i==0)
+      //   h_w3->SetMaximum(0.06);
+      // else if(i==1)
+      //   h_w3->SetMaximum(1.5);
+      // else if(i==2)
+      // 	h_w3->SetMaximum(0.06);
+      // else if(i==3)
+      //   h_w3->SetMaximum(1.5);
+      h_w3->GetXaxis()->SetTitle("w3");
+      f_EH_w1->SetRange(20,350);
+  //     f_EH_w1->SetParameter(0,1.025529);
+  // f_EH_w1->SetParameter(1,3.602263);
+
+      h_w3->Fit("f_H_w1","R");
+      h_w3->Draw("ALP");
+      h_w3->GetFunction("f_H_w1")->SetLineColor(kRed);
+      f3 = h_w3->GetFunction("f_H_w1");
+      file_H<<f3->GetParameter(0)<<"\t"<<f3->GetParameter(1)<<"\t"<<f3->GetParameter(2)<<"\t"<<0<<"\n";//endl;
+      f3->SetRange(10,350);
+      f3->Draw("same");
+      Canvas_n2->Modified();
+      Canvas_n2->cd();
+      sprintf(full_path2,"%s/w3_%s_chi2_method_%s.png",path2,data[i],file_list[i]);
+      Canvas_n2->SetSelected(Canvas_n2);
+      Canvas_n2->SaveAs(full_path2);
+
+      file->cd();
+      h_w1->Write();
+      h_w2->Write();
+      h_w3->Write();
+   }
+ file->Close();
+}
+
+
