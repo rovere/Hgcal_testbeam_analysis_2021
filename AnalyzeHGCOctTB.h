@@ -36,19 +36,19 @@
 class AnalyzeHGCOctTB : public HGCNtupleVariables{
 
  public:
-  AnalyzeHGCOctTB(const TString &inputFileList="foo.txt", const char *outFileName="histo.root",const char *dataset="data", const char *config="alpha", const char* energy = "-1", const char* min_ = "-1", const char* max_ ="-1");
+  AnalyzeHGCOctTB(const TString &inputFileList="foo.txt", const char *outFileName="histo.root",const char *dataset="data", const char *config="alpha", const char* energy = "-1");//, const char* min_ = "-1", const char* max_ ="-1");
   ~AnalyzeHGCOctTB();
   //Bool_t   FillChain(TChain *chain, TChain *chain2, TChain *chain3, const TString &inputFileList);
    Bool_t   FillChain(TChain *chain, const TString &inputFileList); 
   Long64_t LoadTree(Long64_t entry);
-  void     EventLoop(const char *, const char *, const char *,const char *);
+  void     EventLoop(const char *, const char *);//, const char *,const char *);
   void     BookHistogram(const char *, const char *, const char* energy);
 
   void moduleMap_init(const char *);
   void Alignment_Map_Init();
   void Noise_Map_Init();
   void layerPosition_init();
-  void Chi2_Weight_Map_Init(int chi2_method);
+  void Chi2_Weight_Map_Init(int chi2_method); // intialize the weights at different pion energies
   
   std::vector<bool> *noise_flag;
   TFile *oFile;
@@ -126,10 +126,16 @@ class AnalyzeHGCOctTB : public HGCNtupleVariables{
   TH1F* hist_resp_total_0[85];
   TH1F* hist_resp_SS_EE_0[85];
   TH1F* hist_resp_SS_FH_0[85];
-  // TH1F* hist_resp_total_1[85];
-  // TH1F* hist_resp_SS_EE_1[85];
-  // TH1F* hist_resp_SS_FH_1[85];
+  TH1F* hist_resp_total_1[85];
+  TH1F* hist_resp_SS_EE_1[85];
+  TH1F* hist_resp_SS_FH_1[85];
 
+  TH1F* hist_resp_total_funct[85];
+  TH1F* hist_resp_SS_EE_funct[85];
+  TH1F* hist_resp_SS_FH_funct[85];
+  TH1F* hist_resp_total_trimAhcal[85];
+  TH1F* hist_resp_SS_EE_trimAhcal[85];
+  TH1F* hist_resp_SS_FH_trimAhcal[85];
   
   
 };
@@ -180,12 +186,21 @@ int Elist[85] =  {10, 14 , 18 , 22 , 26 , 30,  34 , 38 , 42,  46,  50,  54,  58,
 
      // chi2_mehtod1->cd();
 
-     // sprintf(temp,"Sim_chi2_method1_TrueEn_%d_to_%d",Elist[i],Elist[i+1]);
-     // hist_resp_total_1[i]= new TH1F(temp,temp,xbin,0,xmax);
-     // sprintf(temp,"Sim_chi2_method1_TrueEn_%d_to_%d_SS_EE",Elist[i],Elist[i+1]);
-     // hist_resp_SS_EE_1[i] = new TH1F(temp,temp,xbin,0,xmax);
-     // sprintf(temp,"Sim_chi2_method1_TrueEn_%d_to_%d_SS_FH",Elist[i],Elist[i+1]);
-     // hist_resp_SS_FH_1[i] = new TH1F(temp,temp,xbin,0,xmax);
+     sprintf(temp,"Sim_chi2_method1_TrueEn_%d_to_%d",Elist[i],Elist[i+1]);
+     hist_resp_total_1[i]= new TH1F(temp,temp,xbin,0,xmax);
+     sprintf(temp,"Sim_chi2_method1_TrueEn_%d_to_%d_SS_EE",Elist[i],Elist[i+1]);
+     hist_resp_SS_EE_1[i] = new TH1F(temp,temp,xbin,0,xmax);
+     sprintf(temp,"Sim_chi2_method1_TrueEn_%d_to_%d_SS_FH",Elist[i],Elist[i+1]);
+     hist_resp_SS_FH_1[i] = new TH1F(temp,temp,xbin,0,xmax);
+
+     sprintf(temp,"Sim_chi2_method1_TrueEn_trimAhcal_%d_to_%d",Elist[i],Elist[i+1]);
+     hist_resp_total_trimAhcal[i]= new TH1F(temp,temp,xbin,0,xmax);
+     sprintf(temp,"Sim_chi2_method1_TrueEn_trimAhcal_%d_to_%d_SS_EE",Elist[i],Elist[i+1]);
+     hist_resp_SS_EE_trimAhcal[i] = new TH1F(temp,temp,xbin,0,xmax);
+     sprintf(temp,"Sim_chi2_method1_TrueEn_trimAhcal_%d_to_%d_SS_FH",Elist[i],Elist[i+1]);
+     hist_resp_SS_FH_trimAhcal[i] = new TH1F(temp,temp,xbin,0,xmax);
+
+
 
    }
    
@@ -256,7 +271,7 @@ void AnalyzeHGCOctTB::Alignment_Map_Init() {
   /// Alignment map for config 1, it needs to be changed accorfing to configurations
   
   char* f_name = new char[200];
-  sprintf(f_name,"../../Alignment_Map.txt");
+  sprintf(f_name,"./config_maps/Alignment_Map.txt");
   std::ifstream in(f_name);
   //int layer;
   if(!in) {
@@ -283,7 +298,7 @@ void AnalyzeHGCOctTB::Noise_Map_Init() {
   //Noise map for config - 1 , needs to be changed accordingly
   
   char* f_name = new char[200];
-  sprintf(f_name,"../../Noise_Map.txt");
+  sprintf(f_name,"./config_maps/Noise_Map.txt");
   std::ifstream in(f_name);
   
   if(!in) {
@@ -307,19 +322,19 @@ void AnalyzeHGCOctTB::moduleMap_init(const char* config) {
   char *f_name = new char[200];
 
   if(strcmp(config,"alpha")==0 || strcmp(config,"config1")==0) {
-    sprintf(f_name,"../../config_maps/moduleMAP_config1.txt");
+    sprintf(f_name,"./config_maps/moduleMAP_config1.txt");
     cout<<"\n\nINFO: Mapping module configuration ALPHA (oct10-oct17) "<<endl;
     cout<<"INFO: Mapping EE[0]/FH[1]::Layer #[1-40]::Position on Layer[0 for EE]&[1-7 for FH] consult figure for Daisy structure configuration!!!"<<endl;
 
   }
   else if(strcmp(config,"bravo")==0 || strcmp(config,"config2")==0) {
-    sprintf(f_name,"../../config_maps/moduleMAP_config2.txt");
+    sprintf(f_name,"./config_maps/moduleMAP_config2.txt");
     cout<<"\n\nINFO: Mapping module configuration BRAVO (17oct-22oct) "<<endl;
     cout<<"INFO: Mapping EE[0]/FH[1]::Layer #[1-40]::Position on Layer[0 for EE]&[1-7 for FH] consult figure for Daisy structure configuration!!!"<<endl;
 
   }
   else if(strcmp(config,"charlie")==0  || strcmp(config,"config3")==0) {
-    sprintf(f_name,"../../config_maps/moduleMAP_config3.txt");
+    sprintf(f_name,"./config_maps/moduleMAP_config3.txt");
     cout<<"\n\nINFO: Mapping module configuration CHARLIE (23Oct-4Nov) "<<endl;
     cout<<"INFO: Mapping EE[0]/FH[1]::Layer #[1-40]::Position on Layer[0 for EE]&[1-7 for FH] consult figure for Daisy structure configuration!!!"<<endl;
 
@@ -361,7 +376,7 @@ void AnalyzeHGCOctTB::layerPosition_init() {
   // Layer postions for config - 1, needs to be changed accordingly for other configs
   
   char *f_name = new char[200];
-  sprintf(f_name,"../../config1_lengths.txt");
+  sprintf(f_name,"./config_maps/config1_lengths.txt");
 
   std::ifstream in(f_name);
   if(!in) {
@@ -390,9 +405,9 @@ void AnalyzeHGCOctTB::layerPosition_init() {
 }
 
 
-AnalyzeHGCOctTB::AnalyzeHGCOctTB(const TString &inputFileList, const char *outFileName, const char* dataset, const char* config, const char* energy,const char* min_, const char* max_) {
+AnalyzeHGCOctTB::AnalyzeHGCOctTB(const TString &inputFileList, const char *outFileName, const char* dataset, const char* config, const char* energy) {//,const char* min_, const char* max_) {
 
-  TChain *tree = new TChain("pion_variables");
+  TChain *tree = new TChain("pion_variables_v1");
   // TChain *tree2 = new TChain("trackimpactntupler/impactPoints");
   // TChain *tree3 = new TChain("bigtree");
 
@@ -426,8 +441,8 @@ void AnalyzeHGCOctTB::Chi2_Weight_Map_Init(int chi2_method) {
   case 3 : sprintf(method,"%d : detector scale with offset (0.4 GeV) for H hadrons AND events around the core of beam energy as input to chi2",chi2_method);  break;
   default : cout<<"Incorrect method input use between 0-3"<<endl; exit(0);
 }
-  sprintf(f_name_EH,"./chi2_calibFact_EH_hadrons_flatEn_%d_v1.txt",chi2_method);
-  sprintf(f_name_H,"./chi2_calibFact_H_hadrons_flatEn_%d_v1.txt",chi2_method);
+  sprintf(f_name_EH,"./txt_maps/chi2_flatEn/sim/chi2_calibFact_EH_hadrons_flatEn_%d_scalMC_2sigma.txt",chi2_method);
+  sprintf(f_name_H,"./txt_maps/chi2_flatEn/sim/chi2_calibFact_EH_hadrons_flatEn_%d_scalMC_2sigma.txt",chi2_method);
 
 
 

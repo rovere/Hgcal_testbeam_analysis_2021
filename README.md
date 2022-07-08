@@ -9,8 +9,7 @@ How to run the script
 
 make
 
-./analyzeHGCOctTB <file_list> outFileName.root <dataset> <configuration> <chi2-method> min_ max_ 
-
+./analyzeHGCOctTB <file_list> outFileName.root <dataset> <configuration> <chi2-method> 
 <file_list.txt> : contains files to be analyzed (can be found in file_list folder)
 <configuration> : alpha (always use alpha for config-1)
 <chi2-method> : 0,1,2,3
@@ -21,13 +20,12 @@ make
 
 alwyas use chi2 method -case-1
 
-<min_> & <max_> : put these to random numbers (not being used right now)
 
 Example:
-`./analyzeHGCOctTB file_list/v16_v8/pion100_config1.txt outFileName.root data alpha 1 0 1
+`./analyzeHGCOctTB file_list/v16_v8/pion100_config1.txt outFileName.root data alpha 1 
 How to run the script for sim:
 
-./analyzeHGCOctTB file_list/v16_v8/<sim_file.txt> outFileName.root sim alpha 1 0	1
+./analyzeHGCOctTB file_list/v16_v8/<sim_file.txt> outFileName.root sim alpha 1 
 
 
 
