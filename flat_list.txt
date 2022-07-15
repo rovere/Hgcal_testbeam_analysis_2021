@@ -1,0 +1,6 @@
+/home/kalpana/public/shared/nTuples/Hgcal_TestBeam/FlatEn_June2021/skimmed_ntuple_sim_config22_pions_0to1M_combinedHgc_Ahc_v46.root
+/home/kalpana/public/shared/nTuples/Hgcal_TestBeam/FlatEn_June2021/skimmed_ntuple_sim_config22_pions_1to2M_combinedHgc_Ahc_v46.root
+/home/kalpana/public/shared/nTuples/Hgcal_TestBeam/FlatEn_June2021/skimmed_ntuple_sim_config22_pions_2to3M_combinedHgc_Ahc_v46.root
+/home/kalpana/public/shared/nTuples/Hgcal_TestBeam/FlatEn_June2021/skimmed_ntuple_sim_config22_pions_3to4M_combinedHgc_Ahc_v46.root
+/home/kalpana/public/shared/nTuples/Hgcal_TestBeam/FlatEn_June2021/skimmed_ntuple_sim_config22_pions_4to5M_combinedHgc_Ahc_v46.root
+
