@@ -1,2 +1,0 @@
-/home/work/kalpana/public/work/HgcalTestBeam_OCT18/CMSSW_9_3_0/src/CERN_TB/octTB/data_samples/data_samples/Config1/SkimmedSamples_v16_v8/skimmed_ntuple_data_config22_pion100GeV_HGCv16_AHCv8.root
-

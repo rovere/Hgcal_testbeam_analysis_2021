@@ -1,1 +1,0 @@
-/eos/user/k/kalpana/flatEnergy_pions/CleanedNtuples/skimmed_ntuple_sim_config22_pions_0to1M_combinedHgc_Ahc_v46.root

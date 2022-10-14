@@ -73,69 +73,6 @@ class AnalyzeHGCOctTB : public HGCNtupleVariables{
   TH1F* h_particle;
 
   TH1F* h_true_beamenergy[6];
-  TH1F* h_EnergySum_inEE;
-  TH1F* h_EnergySum_inFH;
-  TH1F* h_EnergySum_inAH;
-  TH1F* h_EnergySum_inAH_inGeV;
-  TH1F* h_EnergySum_inFH_inGeV;
-  TH1F* h_EnergySum_inEE_inGeV;
-  TH1F* h_EnergySum_inGeV;
-  TH1F* h_EnergySum_ratio_inGeV;
-  TH1F* h_EnergySum_ratio_inMips;
-  TH1F* h_EnergySum_Rechit;
-  TH1F* h_EnergySum_Rechit_normalized;
-  TH2F* h_EnergySum_inGeVvstrue;
-  TH2F* h_EnergySum_inMipsvstrue;
-  TH2F* h_EnergySum_inAH_vs_true;
-  TH2F* h_EnergySum_inFH_vs_true;
-  TH2F* h_EnergySum_inEE_vs_true;
-  TH2F* h_EnergySum_inAH_Mipsvs_true;// h_EnergySum_inAHMipsvs_true;
-  TH2F* h_EnergySum_inFH_Mipsvs_true;
-  TH2F* h_EnergySum_inEE_Mipsvs_true;
-  TH1F* h_nrechits;
-  TH1F* h_nrechits_EE;
-  TH1F* h_nrechits_FH;
-  TH1F* h_nrechits_AH;
-  TH1F* h_ratio_nrechits_AH;
-  TH1F* h_ratio_nrechits_FH;
-  TH1F* h_ratio_nrechits_EE;
-  
-   TH1F* h_rechits_mips_EE;
-  TH1F* h_rechits_mips_FH;
-  TH1F* h_rechits_mips_AH;
-  TH2F* h_rechitvslambda;  
-  TH1F* h_rechits_GeV_EE;
-  TH1F* h_rechits_GeV_FH;
-  TH1F* h_rechits_GeV_AH;
-
-  TH2F* h_nrechits_vs_EE;
-  TH2F* h_nrechits_vs_FH;
-  TH2F* h_nrechits_vs_AH;
-  TH2F* h_EnergySum_inEE_vs_FH;
-  TH2F* h_EnergySum_inEE_vs_FH_inGeV;
-  TH2F* h_nrechits_EE_vs_FH;
-  TH2F* h_EnergySum_ratio_vs_true;
-  TH1F* h_EnergySum_ratio_flipped;
-  TH2F*  h_EnergySum_ratio_vs_true_flipped;
-  TH1F* h_ssinEE;
-  TH1F* h_mipsinEE;
-  TDirectory* resp;
-  TDirectory* chi2_mehtod0;
-  //  TDirectory* chi2_mehtod1;
-  TH1F* h_rechit_energy_FB_rel_weightScan[50];
-  TH1F* hist_resp_total_0[85];
-  TH1F* hist_resp_SS_EE_0[85];
-  TH1F* hist_resp_SS_FH_0[85];
-  TH1F* hist_resp_total_1[85];
-  TH1F* hist_resp_SS_EE_1[85];
-  TH1F* hist_resp_SS_FH_1[85];
-
-  TH1F* hist_resp_total_funct[85];
-  TH1F* hist_resp_SS_EE_funct[85];
-  TH1F* hist_resp_SS_FH_funct[85];
-  TH1F* hist_resp_total_trimAhcal[85];
-  TH1F* hist_resp_SS_EE_trimAhcal[85];
-  TH1F* hist_resp_SS_FH_trimAhcal[85];
   
   
 };
@@ -163,109 +100,12 @@ void AnalyzeHGCOctTB::BookHistogram(const char *outFileName, const char* conf,  
       sprintf(hname,"h_truebeamenergy_after_%s",baseline[i]);
       h_true_beamenergy[i]=new TH1F(hname,hname,400,0,400);
     }
-int Elist[85] =  {10, 14 , 18 , 22 , 26 , 30,  34 , 38 , 42,  46,  50,  54,  58,  62,  66,  70,  74,  78,
-                     82,  86,  90,  94,  98, 102, 106, 110, 114 ,118, 122, 126, 130, 134, 138, 142 ,146, 150,
-                     154 ,158 ,162 ,166 ,170 ,174 ,178, 182, 186, 190 ,194 ,198, 202, 206, 210, 214 ,218, 222,
-                     226, 230, 234 ,238, 242 ,246 ,250, 254, 258 ,262 ,266, 270, 274, 278, 282, 286, 290, 294,
-                     298, 302 ,306, 310, 314, 318 ,322, 326, 330, 334 ,338 ,342 ,346};
 
- chi2_mehtod0 =oFile->mkdir("chi2_mehtod0");
- //chi2_mehtod1 =oFile->mkdir("chi2_mehtod1");
-   for(int i = 0; i < 85; i++) {
-     char* temp = new char[100];
-     double xmin = -1;
-     double xmax = 6*Elist[i];
-     double xbin = 700;
-     chi2_mehtod0->cd();
-     sprintf(temp,"Sim_chi2_method0_TrueEn_%d_to_%d",Elist[i],Elist[i+1]);
-     hist_resp_total_0[i]= new TH1F(temp,temp,xbin,0,xmax);
-     sprintf(temp,"Sim_chi2_method0_TrueEn_%d_to_%d_SS_EE",Elist[i],Elist[i+1]);
-     hist_resp_SS_EE_0[i] = new TH1F(temp,temp,xbin,0,xmax);
-     sprintf(temp,"Sim_chi2_method0_TrueEn_%d_to_%d_SS_FH",Elist[i],Elist[i+1]);
-     hist_resp_SS_FH_0[i] = new TH1F(temp,temp,xbin,0,xmax);
-
-     // chi2_mehtod1->cd();
-
-     sprintf(temp,"Sim_chi2_method1_TrueEn_%d_to_%d",Elist[i],Elist[i+1]);
-     hist_resp_total_1[i]= new TH1F(temp,temp,xbin,0,xmax);
-     sprintf(temp,"Sim_chi2_method1_TrueEn_%d_to_%d_SS_EE",Elist[i],Elist[i+1]);
-     hist_resp_SS_EE_1[i] = new TH1F(temp,temp,xbin,0,xmax);
-     sprintf(temp,"Sim_chi2_method1_TrueEn_%d_to_%d_SS_FH",Elist[i],Elist[i+1]);
-     hist_resp_SS_FH_1[i] = new TH1F(temp,temp,xbin,0,xmax);
-
-     sprintf(temp,"Sim_chi2_method1_TrueEn_trimAhcal_%d_to_%d",Elist[i],Elist[i+1]);
-     hist_resp_total_trimAhcal[i]= new TH1F(temp,temp,xbin,0,xmax);
-     sprintf(temp,"Sim_chi2_method1_TrueEn_trimAhcal_%d_to_%d_SS_EE",Elist[i],Elist[i+1]);
-     hist_resp_SS_EE_trimAhcal[i] = new TH1F(temp,temp,xbin,0,xmax);
-     sprintf(temp,"Sim_chi2_method1_TrueEn_trimAhcal_%d_to_%d_SS_FH",Elist[i],Elist[i+1]);
-     hist_resp_SS_FH_trimAhcal[i] = new TH1F(temp,temp,xbin,0,xmax);
-
-
-
-   }
-   
-   //   char* hname = new char[2000];
-   for(int i = 0; i < 50; i++) {
-     sprintf(hname,"h_weight_%d",i+1);
-     
-    h_rechit_energy_FB_rel_weightScan[i] = new TH1F(hname,hname,1000,0.0,12000);
-    h_rechit_energy_FB_rel_weightScan[i]->GetXaxis()->SetTitle("Energy in units of MIPs");
-    h_rechit_energy_FB_rel_weightScan[i]->Sumw2();
-  }
-
-  h_beamenergy = new TH1F("h_beamenergy","h_beamenergy",320,0,320);
-  //  h_true_beamenergy = new TH1F("h_true_beamenergy","h_true_beamenergy",350,0,350);
-  h_particle = new TH1F("h_particle","h_particle",600,-300,300);
-
-
-  h_rechits_mips_EE = new TH1F("h_rechits_mips_EE","h_rechits_mips_EE",500,0,4500);
-   h_rechits_mips_FH = new TH1F("h_rechits_mips_FH","h_rechits_mips_FH",500,0,4500);
- h_rechits_mips_AH = new TH1F("h_rechits_mips_AH","h_rechits_mips_AH",500,0,4500);
-   
- h_rechits_GeV_EE = new TH1F("h_rechits_GeV_EE","h_rechits_GeV_EE",1000,0,500);
- h_rechits_GeV_FH = new TH1F("h_rechits_GeV_FH","h_rechits_GeV_FH",1000,0,500);
- h_rechits_GeV_AH = new TH1F("h_rechits_GeV_AH","h_rechits_GeV_AH",1000,0,500);
- h_rechitvslambda = new TH2F("h_rechitvslambda","h_rechitvslambda",60,0,12,500,0,3000);
-
-  h_EnergySum_inEE=new TH1F("h_EnergySum_SSinEE","h_EnergySum_SSinEE",500,0,40000);
-  h_ssinEE = new TH1F("h_ssinEE","h_ssinEE",300,0,300);
-  h_mipsinEE = new TH1F("h_mipsinEE","h_mipsinEE",300,0,300);
-  h_EnergySum_inFH=new TH1F("h_EnergySum_SSinFH","h_EnergySum_SSinFH",500,0,40000);
-  h_EnergySum_inAH=new TH1F("h_EnergySum_SSinAH","h_EnergySum_SSinAH",500,0,40000);
-  h_EnergySum_inEE_inGeV=new TH1F("h_EnergySum_SSinEE_inGeV","h_EnergySum_SSinEE_inGeV",1000,0,1000);
-  h_EnergySum_inFH_inGeV=new TH1F("h_EnergySum_SSinFH_inGeV","h_EnergySum_SSinFH_inGeV",1000,0,1000);
-  h_EnergySum_inAH_inGeV=new TH1F("h_EnergySum_SSinAH_inGeV","h_EnergySum_SSinAH_inGeV",1000,0,1000);
-  h_EnergySum_inGeV = new TH1F("h_EnergySum_inGeV","h_EnergySum_inGeV",1000,0,1000);
-  h_EnergySum_ratio_inGeV = new TH1F("h_EnergySum_ratio_inGeV","h_EnergySum_ratio_inGeV",1000,0,10);
-  h_EnergySum_ratio_vs_true = new TH2F("h_EnergySum_ratio_vs_true"," ratio vs true",1000,0,10,500,0,500);
-  h_EnergySum_ratio_flipped = new TH1F("h_EnergySum_ratio_flipped","pred/true",10000,-10,3);
-  h_EnergySum_ratio_vs_true_flipped = new TH2F("h_EnergySum_ratio_vs_true_flipped"," pred/true vs true",1000,0,10,500,0,500);
-  h_EnergySum_ratio_inMips = new TH1F("h_EnergySum_ratio_inMips","h_EnergySum_ratio_inMips",10000,0,10);
-  h_EnergySum_inGeVvstrue = new TH2F("h_EnergySum_inGeVvstrue","h_EnergySum_inGeV",1000,0,1000,500,0,500);
-  h_EnergySum_inMipsvstrue = new TH2F("h_EnergySum_inMipsvstrue","h_EnergySum_inGeV",1000,0,60000,500,0,500);
-  h_EnergySum_inAH_vs_true = new TH2F("h_EnergySum_inAH_vs_true","h_EnergySum_inAH_vs_true",800,0,800,500,0,500);
-  h_EnergySum_inEE_vs_true = new TH2F("h_EnergySum_inEE_vs_true","h_EnergySum_inEE_vs_true",800,0,800,500,0,500);
-  h_EnergySum_inFH_vs_true = new TH2F("h_EnergySum_inFH_vs_true","h_EnergySum_inFH_vs_true",800,0,800,500,0,500);
-  h_EnergySum_inAH_Mipsvs_true = new TH2F("h_EnergySum_inAH_Mipsvs_true","h_EnergySum_inAH_Mipsvs_true",1000,0,40000,500,0,500);
-  h_EnergySum_inEE_Mipsvs_true = new TH2F("h_EnergySum_inEE_Mipsvs_true","h_EnergySum_inEE_Mipsvs_true",1000,0,60000,500,0,500);
-  h_EnergySum_inFH_Mipsvs_true = new TH2F("h_EnergySum_inFH_Mipsvs_true","h_EnergySum_inFH_Mipsvs_true",1000,0,20000,500,0,500);
-  h_EnergySum_inEE_vs_FH = new TH2F("h_EnergySum_inEE_vs_FH","enegry in EE vs energy in FH in mips",1000,0,60000,1000,0,20000);
-  h_EnergySum_inEE_vs_FH_inGeV = new TH2F("h_EnergySum_inEE_vs_FH_inGeV","enegry in EE vs energy in FH in GeV",1000,0,1000,1000,0,1000);
-  h_EnergySum_Rechit = new TH1F("h_EnergySum_Rechit","h_EnergySum_Rechit",500,0,60000);
-  h_EnergySum_Rechit_normalized = new TH1F("h_EnergySum_Rechit_normalized","h_EnergySum_Rechit_normalized",500,0,1000);
-  h_nrechits = new TH1F("h_nrechits","total rechits in the prototype",1000,0,10000);
-  h_nrechits_EE = new TH1F("h_nrechits_EE","rechits in EE",1000,0,10000);
-  h_nrechits_FH = new TH1F("h_nrechits_FH","rechits in FH",1000,0,10000);
-  h_nrechits_AH = new TH1F("h_nrechits_AH","rechits in AH",1000,0,10000);
-  h_ratio_nrechits_AH = new TH1F("h_ratio_nrechits_AH","h_ratio_nrechits_AH",1000,0,10);
-  h_ratio_nrechits_FH =	new TH1F("h_ratio_nrechits_FH","h_ratio_nrechits_FH",1000,0,10);
-  h_ratio_nrechits_EE =	new TH1F("h_ratio_nrechits_EE","h_ratio_nrechits_EE",1000,0,10);
-  h_nrechits_vs_EE = new TH2F("h_nrechits_vs_EE","total vs rechits in EE",1000,0,10000,1000,0,10000);
-  h_nrechits_vs_FH = new TH2F("h_nrechits_vs_FH","total vs rechits in FH",1000,0,10000,1000,0,10000);
-  h_nrechits_vs_AH = new TH2F("h_nrechits_vs_AH","total vs rechits in AH",1000,0,10000,1000,0,10000);
-  h_nrechits_EE_vs_FH = new TH2F("h_nrechits_EE_vs_FH","EE vs rechits in FH",1000,0,10000,1000,0,10000);
 
 }
+   
+
+
 
 void AnalyzeHGCOctTB::Alignment_Map_Init() {
   /// Alignment map for config 1, it needs to be changed accorfing to configurations
