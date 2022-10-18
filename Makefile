@@ -14,13 +14,13 @@ all: $(SOURCES) $(EXECUTABLE)
 
 %.o: %.cc
 	@echo Compiling $<...
-	$(CXX) $(CXXFLAGS) -g -c -o $@ $< 
+	$(CXX) $(CXXFLAGS) -O2 -g -c -o $@ $< 
 
 
 $(EXECUTABLE): $(OBJECTS)
 	@echo "Linking $(PROGRAM) ..."
 	@echo "@$(CXX) $(LIBS) $(OBJECTS) -g -o $@"
-	@$(CXX)  -g -o $@ $^ $(LIBS)
+	@$(CXX) -O2 -g -o $@ $^ $(LIBS)
 	@echo "done"
 
 
