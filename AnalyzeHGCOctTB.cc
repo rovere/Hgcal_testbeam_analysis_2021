@@ -215,12 +215,6 @@ void AnalyzeHGCOctTB::EventLoop(const char *data, const char *energy) {
     Esum_rechits_AH_inGeV = 0.12508 * rechitEnergySum_AH;
     auto Esum_allRecHits_inGeV =
         Esum_rechits_AH_inGeV + Esum_rechits_FH_inGeV + Esum_rechits_EE_inGeV;
-    if (DEBUG) {
-      std::cout << "True energy: " << trueBeamEnergy
-                << " Sum(RecHits_energy): " << Esum_allRecHits_inGeV
-                << " Ratio: " << trueBeamEnergy / Esum_allRecHits_inGeV
-                << std::endl;
-    }
     if (DEBUG) cout << "DEBUG: End of Entry = " << jentry << endl;
     if (DEBUG) cout << "DEBUG: ****************** " << endl;
     //      cout<<"\t"<<"beforE"<<endl;
@@ -233,6 +227,7 @@ void AnalyzeHGCOctTB::EventLoop(const char *data, const char *energy) {
     constexpr float outlierDeltaFactor = 2.f;
     pcloud.x = *rechit_x;
     pcloud.y = *rechit_y;
+    pcloud.z = *comb_rechit_z_trimAhcal;
     pcloud.weight = *rechit_energy;
     pcloud.layer = *rechit_layer;
     pcloud.outResize(rechit_x->size());
@@ -240,8 +235,26 @@ void AnalyzeHGCOctTB::EventLoop(const char *data, const char *energy) {
     compute_histogram(tiles, pcloud);
     calculate_density(tiles, pcloud, dc);
     calculate_distanceToHigher(tiles, pcloud, outlierDeltaFactor, dc);
-    findAndAssign_clusters(pcloud, outlierDeltaFactor, dc, 2.);
-
+    auto total_clusters = findAndAssign_clusters(pcloud, outlierDeltaFactor, dc, 2.);
+    auto clusters = getClusters(total_clusters, pcloud);
+    float total_energy_clustered = 0.f;
+    for (auto const & cl : clusters) {
+      auto pos = cl.position();
+      std::cout << std::get<0>(pos) << " "
+        << std::get<1>(pos) << " "
+        << std::get<2>(pos) << " "
+        << std::endl;
+      total_energy_clustered += cl.energy();
+    }
+    if (1) {
+      std::cout << "True energy: " << trueBeamEnergy
+                << " Sum(RecHits_energy): " << Esum_allRecHits_inGeV
+                << " Ratio: " << Esum_allRecHits_inGeV / trueBeamEnergy
+                << " Clustered Energy: " << total_energy_clustered
+                << " Ratio: " << total_energy_clustered / Esum_allRecHits_inGeV
+                << " Total number of clusters: " << total_clusters
+                << std::endl;
+    }
   }  // loop over entries
 
   ///////////////////////////////////////////////////////////

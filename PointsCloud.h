@@ -19,6 +19,7 @@ struct PointsCloud {
   // Input variables
   std::vector<float> x;
   std::vector<float> y;
+  std::vector<float> z;
   std::vector<unsigned int> layer;
   std::vector<float> weight;
 

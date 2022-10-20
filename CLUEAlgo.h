@@ -1,8 +1,11 @@
 #ifndef CLUEAlgo_h
 #define CLUEAlgo_h
 
+#include <cmath>
+
 #include "LayerTiles.h"
 #include "PointsCloud.h"
+#include "Cluster.h"
 
 inline float distance(PointsCloud &points, int i, int j) {
   // 2-d distance on the layer
@@ -107,7 +110,7 @@ void calculate_distanceToHigher(std::array<LayerTiles, NLAYERS> &d_hist,
   }  // end of loop over points
 };
 
-void findAndAssign_clusters(PointsCloud &points, float outlierDeltaFactor,
+int findAndAssign_clusters(PointsCloud &points, float outlierDeltaFactor,
                             float dc, float rhoc) {
   int nClusters = 0;
 
@@ -154,6 +157,77 @@ void findAndAssign_clusters(PointsCloud &points, float outlierDeltaFactor,
     }
   }
   // std::cout << "Total clusters created: " <<  nClusters << std::endl;
+  return nClusters;
 };
+
+void calculatePosition(const PointsCloud & points, Cluster & cl) {
+  constexpr float thresholdW0 = 2.9f;
+  float total_weight = 0.f;
+  float x = 0.f;
+  float y = 0.f;
+
+  unsigned int maxEnergyIndex = 0;
+  float maxEnergyValue = 0.f;
+
+  // loop over hits in cluster candidate
+  // determining the maximum energy hit
+  for (auto i : cl.hits()) {
+    total_weight += points.weight[i];
+    if (points.weight[i] > maxEnergyValue) {
+      maxEnergyValue = points.weight[i];
+      maxEnergyIndex = i;
+    }
+  }
+
+  // TODO: this is recomputing everything twice and overwriting the position with log weighting position
+  float total_weight_log = 0.f;
+  float x_log = 0.f;
+  float y_log = 0.f;
+  for (auto i : cl.hits()) {
+//    //for silicon only just use 1+6 cells = 1.3cm for all thicknesses
+//    if (distance2(i, maxEnergyIndex, layerId, false) > positionDeltaRho2_)
+//      continue;
+    float rhEnergy = points.weight[i];
+    float Wi = std::fmax(thresholdW0 + std::log(rhEnergy / total_weight), 0.);
+    x_log += points.x[i] * Wi;
+    y_log += points.y[i] * Wi;
+    total_weight_log += Wi;
+  }
+
+  total_weight = total_weight_log;
+  x = x_log;
+  y = y_log;
+  if (total_weight != 0.) {
+    float inv_tot_weight = 1.f / total_weight;
+    cl.setPosition(x * inv_tot_weight,
+                   y * inv_tot_weight,
+                   points.z[cl.hits()[0]]);
+  } else {
+    return cl.setPosition(0.f, 0.f, 0.f);
+  }
+}
+
+
+std::vector<Cluster> getClusters(int totalClusters, PointsCloud points) {
+  std::vector<Cluster> clusters(totalClusters);
+
+  // loop over all points
+  for (unsigned int i = 0; i < points.n; i++) {
+    // If it has a valid cluster index, assign that point to the corresponding cluster
+    if (points.clusterIndex[i] != -1) {
+      auto & thisCluster = clusters[points.clusterIndex[i]];
+      thisCluster.addCell(i);
+      thisCluster.addEnergy(points.weight[i], points.z[i]);
+      thisCluster.setLayer(points.layer[i]);
+    }
+  }
+
+  // Now that we have all clusters, compute their barycenter
+  for (auto & cl : clusters) {
+    calculatePosition(points, cl);
+  }
+
+  return clusters;
+}
 
 #endif
