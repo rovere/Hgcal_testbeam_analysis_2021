@@ -15,6 +15,25 @@ using namespace std;
 
 // chip 3022,44,3028
 
+void dumpSoA(const PointsCloud & points) {
+  std::cout << "SoA DUMP" << std::endl;
+  for (int c = 0 ; c < points.x.size(); ++c) {
+    std::cout
+      << "id " << c
+      << " x = " << points.x[c]
+      << " y = " << points.y[c]
+      << " z = " << points.z[c]
+      << " layer = " << points.layer[c]
+      << " energy = " << points.weight[c]
+      << " rho = " << points.rho[c]
+      << " delta = " << points.delta[c]
+      << " isSeed = " << points.isSeed[c]
+      << " clusterIdx = " << points.clusterIndex[c]
+      << " nearestHigher = " << points.nearestHigher[c]
+      << std::endl;
+  }
+}
+
 int main(int argc, char *argv[])  //, int argvv[])
 {
   if (argc < 5) {
