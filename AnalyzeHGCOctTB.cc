@@ -64,6 +64,7 @@ int main(int argc, char *argv[])  //, int argvv[])
 }
 
 void AnalyzeHGCOctTB::EventLoop(const char *data, const char *energy) {
+  bool NTUPLEOUT = true;
   if (fChain == 0) return;
 
   Long64_t nentries = fChain->GetEntriesFast();
@@ -290,6 +291,17 @@ void AnalyzeHGCOctTB::EventLoop(const char *data, const char *energy) {
                 << " Clustered Energy: " << total_energy_clustered
                 << " Ratio: " << total_energy_clustered / Esum_allRecHits_inGeV
                 << " Total number of clusters: " << total_clusters
+                << std::endl;
+    }
+
+    if (NTUPLEOUT) {
+      std::cout << event_count[0]
+                << "," << trueBeamEnergy
+                << "," << Esum_allRecHits_inGeV
+                << "," << Esum_allRecHits_inGeV / trueBeamEnergy
+                << "," << total_energy_clustered
+                << "," << total_energy_clustered / Esum_allRecHits_inGeV
+                << "," << total_clusters
                 << std::endl;
     }
   }  // loop over entries
