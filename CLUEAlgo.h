@@ -18,16 +18,30 @@ inline float distance(PointsCloud &points, int i, int j) {
   }
 }
 
-inline void updateLayers(PointsCloud &points, const float z_boundaries[]) {
+inline void updateLayersAndEnergies(PointsCloud &points,
+    const float z_boundaries[],
+    const float mip2gev[]) {
   points.layer.resize(points.z.size(), 0);
   int counter = 0;
   for (auto z : points.z) {
     for (unsigned int l = 0; l < 50; ++l) {
       if (z_boundaries[l] > z) {
-        points.layer[counter] = l;
+        points.layer[counter] = l+1;
         break;
       }
     }
+
+    // Rescale energy to GeV, according to the layer
+    if (points.layer[counter] < 28) {
+      points.weight[counter] *= mip2gev[0];
+    } else if (points.layer[counter] < 41) {
+      points.weight[counter] *= mip2gev[1];
+    } else {
+      points.weight[counter] *= mip2gev[2];
+    }
+//    std::cout << "Got Layer " << points.layer[counter] << " for Z " << points.z[counter]
+//      << " with calibrated energy: " << points.weight[counter] << std::endl;
+    // Next Rechits
     ++counter;
   }
 }
@@ -231,7 +245,8 @@ std::vector<Cluster> getClusters(int totalClusters, PointsCloud points) {
     if (points.clusterIndex[i] != -1) {
       auto & thisCluster = clusters[points.clusterIndex[i]];
       thisCluster.addCell(i);
-      thisCluster.addEnergy(points.weight[i], points.z[i]);
+//      thisCluster.addEnergyAndRescale(points.weight[i], points.z[i]);
+      thisCluster.addEnergy(points.weight[i]);
       thisCluster.setLayer(points.layer[i]);
     }
   }

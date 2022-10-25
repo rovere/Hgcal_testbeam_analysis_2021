@@ -140,6 +140,8 @@ void AnalyzeHGCOctTB::EventLoop(const char *data, const char *energy) {
   50., 51., 53., 54.5, 65., 72., 79., 86., 92., 99., 116., 124., 132., 140., 146., 154.,
   170., 180., 190., 200., 210., 220., 232., 242., 252., 262.};
 
+  float MIP2GeV[3] = {0.0105, 0.0812, 0.12508};
+
   // to select the evnts within 2sigma region
 
   if (DEBUG) cout << "DEBUG: Configuration = " << conf_ << endl;
@@ -253,26 +255,36 @@ void AnalyzeHGCOctTB::EventLoop(const char *data, const char *energy) {
     pcloud.y = *comb_rechit_y_trimAhcal;
     pcloud.z = *comb_rechit_z_trimAhcal;
     pcloud.weight = *rechitEn_trimAhcal;
-    updateLayers(pcloud, comb_z_boundaries);
+    updateLayersAndEnergies(pcloud, comb_z_boundaries, MIP2GeV);
 //    pcloud.layer = *rechit_layer;
     pcloud.outResize(rechit_x->size());
 
     compute_histogram(tiles, pcloud);
     calculate_density(tiles, pcloud, dc);
     calculate_distanceToHigher(tiles, pcloud, outlierDeltaFactor, dc);
-    auto total_clusters = findAndAssign_clusters(pcloud, outlierDeltaFactor, dc, 2.);
+    auto total_clusters = findAndAssign_clusters(pcloud, outlierDeltaFactor, dc, rhoc);
     auto clusters = getClusters(total_clusters, pcloud);
+
+    if (DEBUG) {
+      dumpSoA(pcloud);
+    }
+
     float total_energy_clustered = 0.f;
     for (auto const & cl : clusters) {
       auto pos = cl.position();
-      std::cout << std::get<0>(pos) << " "
-        << std::get<1>(pos) << " "
-        << std::get<2>(pos) << " "
-        << std::endl;
+      if (DEBUG) {
+        std::cout << std::get<0>(pos) << " "
+          << std::get<1>(pos) << " "
+          << std::get<2>(pos) << " "
+          << cl.energy() << " "
+          << std::endl;
+      }
       total_energy_clustered += cl.energy();
     }
-    if (1) {
-      std::cout << "True energy: " << trueBeamEnergy
+
+    if (DEBUG) {
+      std::cout << "Event count " << event_count[0]
+                << " True energy: " << trueBeamEnergy
                 << " Sum(RecHits_energy): " << Esum_allRecHits_inGeV
                 << " Ratio: " << Esum_allRecHits_inGeV / trueBeamEnergy
                 << " Clustered Energy: " << total_energy_clustered
