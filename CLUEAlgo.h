@@ -18,6 +18,20 @@ inline float distance(PointsCloud &points, int i, int j) {
   }
 }
 
+inline void updateLayers(PointsCloud &points, const float z_boundaries[]) {
+  points.layer.resize(points.z.size(), 0);
+  int counter = 0;
+  for (auto z : points.z) {
+    for (unsigned int l = 0; l < 50; ++l) {
+      if (z_boundaries[l] > z) {
+        points.layer[counter] = l;
+        break;
+      }
+    }
+    ++counter;
+  }
+}
+
 void compute_histogram(std::array<LayerTiles, NLAYERS> &d_hist,
                        PointsCloud &points) {
   for (unsigned int i = 0; i < points.n; i++) {

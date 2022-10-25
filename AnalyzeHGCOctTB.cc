@@ -116,6 +116,11 @@ void AnalyzeHGCOctTB::EventLoop(const char *data, const char *energy) {
       250, 254, 258, 262, 266, 270, 274, 278, 282, 286, 290, 294, 298, 302, 306,
       310, 314, 318, 322, 326, 330, 334, 338, 342, 346};
 
+  float comb_z_boundaries[50] = {14., 15., 17., 18., 20., 21., 23., 24., 26.,
+  27., 29., 30., 32., 33., 35., 36., 37.5, 38.5, 40.5, 41., 43.5, 44.5, 47., 48.,
+  50., 51., 53., 54.5, 65., 72., 79., 86., 92., 99., 116., 124., 132., 140., 146., 154.,
+  170., 180., 190., 200., 210., 220., 232., 242., 252., 262.};
+
   // to select the evnts within 2sigma region
 
   if (DEBUG) cout << "DEBUG: Configuration = " << conf_ << endl;
@@ -225,11 +230,12 @@ void AnalyzeHGCOctTB::EventLoop(const char *data, const char *energy) {
     constexpr float dc = 1.3;
     constexpr float rhoc = 2.f;
     constexpr float outlierDeltaFactor = 2.f;
-    pcloud.x = *rechit_x;
-    pcloud.y = *rechit_y;
+    pcloud.x = *comb_rechit_x_trimAhcal;
+    pcloud.y = *comb_rechit_y_trimAhcal;
     pcloud.z = *comb_rechit_z_trimAhcal;
-    pcloud.weight = *rechit_energy;
-    pcloud.layer = *rechit_layer;
+    pcloud.weight = *rechitEn_trimAhcal;
+    updateLayers(pcloud, comb_z_boundaries);
+//    pcloud.layer = *rechit_layer;
     pcloud.outResize(rechit_x->size());
 
     compute_histogram(tiles, pcloud);
