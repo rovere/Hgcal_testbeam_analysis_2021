@@ -124,7 +124,7 @@ void AnalyzeHGCOctTB::EventLoop(const char *data, const char *energy) {
     fh_rescaling = 1;
     ah_rescaling = 1;
   }
-  cout << "sim rescaling"
+  cout << data << " rescaling"
        << "\t" << ee_rescaling << "\t" << fh_rescaling << "\t" << ah_rescaling
        << endl;
 
@@ -136,12 +136,13 @@ void AnalyzeHGCOctTB::EventLoop(const char *data, const char *energy) {
       250, 254, 258, 262, 266, 270, 274, 278, 282, 286, 290, 294, 298, 302, 306,
       310, 314, 318, 322, 326, 330, 334, 338, 342, 346};
 
-  float comb_z_boundaries[50] = {14., 15., 17., 18., 20., 21., 23., 24., 26.,
-  27., 29., 30., 32., 33., 35., 36., 37.5, 38.5, 40.5, 41., 43.5, 44.5, 47., 48.,
-  50., 51., 53., 54.5, 65., 72., 79., 86., 92., 99., 116., 124., 132., 140., 146., 154.,
-  170., 180., 190., 200., 210., 220., 232., 242., 252., 262.};
+  float comb_z_boundaries[50] = {14., 15., 17., 18., 20., 21., 23., 24.,
+    26.,  27.,  29.,   30., 32.,   33., 35.,  36.,  37.5, 38.5,
+    40.5, 41., 43.5,  44.5, 47.,   48., 50.,  51.,   53., 54.5,
+    65.,  72.,  79.,   86., 92.,   99., 116., 124., 132., 140.,
+    146., 154., 170., 180., 190., 200., 210., 220., 232., 242.,
+    252., 262.};
 
-  float MIP2GeV[3] = {0.0105, 0.0812, 0.12508};
 
   // to select the evnts within 2sigma region
 
@@ -166,8 +167,38 @@ void AnalyzeHGCOctTB::EventLoop(const char *data, const char *energy) {
                          67, 71, 75, 79};  // selected layers (10 in total) out
                                            // of AHCAL (39 in total)
 
+  TFile *f = new TFile("CLUE_clusters.root","RECREATE");
+  TTree clusters_tree("clusters", "clusters");
+
+  // Create a unique PointsCloud object and (re)-use it to fill the output
+  // ntuple.
+  PointsCloud pcloud;
+
+  // Create a SoA for the output clusters
+  ClustersSoA clusters_soa;
+
+  float Esum_allRecHits_inGeV;
+
+  // Create the branches in the output ntuple.
+  clusters_tree.Branch("rechits_x", &pcloud.x);
+  clusters_tree.Branch("rechits_y", &pcloud.y);
+  clusters_tree.Branch("rechits_z", &pcloud.z);
+  clusters_tree.Branch("rechits_energy", &pcloud.weight);
+  clusters_tree.Branch("rechits_layer", &pcloud.layer);
+  clusters_tree.Branch("rechits_rho", &pcloud.rho);
+  clusters_tree.Branch("rechits_delta", &pcloud.delta);
+  clusters_tree.Branch("all_rechits_energy", &Esum_allRecHits_inGeV, "all_rechits_energy/F");
+  clusters_tree.Branch("clusters_x", &clusters_soa.x);
+  clusters_tree.Branch("clusters_y", &clusters_soa.y);
+  clusters_tree.Branch("clusters_z", &clusters_soa.z);
+  clusters_tree.Branch("clusters_energy", &clusters_soa.energy);
+  clusters_tree.Branch("clusters_layer", &clusters_soa.layer);
+
   for (jentry = 0; jentry < nentries; jentry++, hgc_jentry++) {
-    //   for (jentry=0; jentry<10000;jentry++,hgc_jentry++) {
+
+    // Reset PointsCloud
+    pcloud.reset();
+
     // ==============print number of events done == == == == == == == =
     double progress = 10.0 * jentry / (1.0 * nentries);
     int k = int(progress);
@@ -208,8 +239,6 @@ void AnalyzeHGCOctTB::EventLoop(const char *data, const char *energy) {
     rechits_EE = 0;
     rechits_FH = 0;
     rechits_AH = 0;
-    // if(event ==3482)
-    // {//continue;
     int nrechit_trimAhcal = 0;
     /// Read HGCAL + AHCAL (only 10 layers out of 39) combined Tree
     if (DEBUG) cout << "DEBUG: Start Analylizing HGCAL  RecHits!!" << endl;
@@ -240,7 +269,7 @@ void AnalyzeHGCOctTB::EventLoop(const char *data, const char *energy) {
     Esum_rechits_FH_inGeV = 0.0812 * Esum_rechits_FH;  // updated relative
                                                        // weight
     Esum_rechits_AH_inGeV = 0.12508 * rechitEnergySum_AH;
-    auto Esum_allRecHits_inGeV =
+    Esum_allRecHits_inGeV =
         Esum_rechits_AH_inGeV + Esum_rechits_FH_inGeV + Esum_rechits_EE_inGeV;
     if (DEBUG) cout << "DEBUG: End of Entry = " << jentry << endl;
     if (DEBUG) cout << "DEBUG: ****************** " << endl;
@@ -248,9 +277,9 @@ void AnalyzeHGCOctTB::EventLoop(const char *data, const char *energy) {
 
     // Compute clusters using CLUE
     std::array<LayerTiles, NLAYERS> tiles;
-    PointsCloud pcloud;
-    constexpr float dc = 1.3;
-    constexpr float rhoc = 2.f;
+    constexpr float MIP2GeV[3] = {0.0105, 0.0812, 0.12508};
+    constexpr float dc[2] = {1.3f, 3.f * sqrt(2.f) + 0.1};
+    constexpr float rhoc[2] = {8.f * MIP2GeV[0], 8.f * MIP2GeV[2]};
     constexpr float outlierDeltaFactor = 2.f;
     pcloud.x = *comb_rechit_x_trimAhcal;
     pcloud.y = *comb_rechit_y_trimAhcal;
@@ -258,14 +287,17 @@ void AnalyzeHGCOctTB::EventLoop(const char *data, const char *energy) {
     pcloud.weight = *rechitEn_trimAhcal;
     updateLayersAndEnergies(pcloud, comb_z_boundaries, MIP2GeV);
 //    pcloud.layer = *rechit_layer;
-    pcloud.outResize(rechit_x->size());
+    pcloud.resizeOutputContainers(comb_rechit_x_trimAhcal->size());
 
     compute_histogram(tiles, pcloud);
     calculate_density(tiles, pcloud, dc);
     calculate_distanceToHigher(tiles, pcloud, outlierDeltaFactor, dc);
     auto total_clusters = findAndAssign_clusters(pcloud, outlierDeltaFactor, dc, rhoc);
     auto clusters = getClusters(total_clusters, pcloud);
+    // Fill in the clusters_SoA
+    clusters_soa.load(clusters);
 
+    clusters_tree.Fill();
     if (DEBUG) {
       dumpSoA(pcloud);
     }
@@ -305,10 +337,13 @@ void AnalyzeHGCOctTB::EventLoop(const char *data, const char *energy) {
                 << std::endl;
     }
   }  // loop over entries
+  f->cd();
+  clusters_tree.Write();
 
   ///////////////////////////////////////////////////////////
   ///////  E N D     O F     E N T R Y     L O O P     //////
   ///////////////////////////////////////////////////////////
   //  gSystem->Exit(0);
   cout << "Got Out " << jentry << endl;
+  f->Write();
 }

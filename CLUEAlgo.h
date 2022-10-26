@@ -32,7 +32,7 @@ inline void updateLayersAndEnergies(PointsCloud &points,
     }
 
     // Rescale energy to GeV, according to the layer
-    if (points.layer[counter] < 28) {
+    if (points.layer[counter] < 29) {
       points.weight[counter] *= mip2gev[0];
     } else if (points.layer[counter] < 41) {
       points.weight[counter] *= mip2gev[1];
@@ -55,14 +55,17 @@ void compute_histogram(std::array<LayerTiles, NLAYERS> &d_hist,
 };
 
 void calculate_density(std::array<LayerTiles, NLAYERS> &d_hist,
-                       PointsCloud &points, float dc) {
+                       PointsCloud &points, const float dc[]) {
   // loop over all points
   for (unsigned int i = 0; i < points.n; i++) {
     LayerTiles &lt = d_hist[points.layer[i]];
 
+    float dc_effective = points.layer[i] < 41 ? dc[0] : dc[1];
+
     // get search box
     std::array<int, 4> search_box = lt.searchBox(
-        points.x[i] - dc, points.x[i] + dc, points.y[i] - dc, points.y[i] + dc);
+        points.x[i] - dc_effective, points.x[i] + dc_effective,
+        points.y[i] - dc_effective, points.y[i] + dc_effective);
 
     // loop over bins in the search box
     for (int xBin = search_box[0]; xBin < search_box[1] + 1; ++xBin) {
@@ -75,10 +78,10 @@ void calculate_density(std::array<LayerTiles, NLAYERS> &d_hist,
         // iterate inside this bin
         for (int binIter = 0; binIter < binSize; binIter++) {
           unsigned int j = lt[binId][binIter];
-          // query N_{dc}(i)
+          // query N_{dc_effective}(i)
           float dist_ij = distance(points, i, j);
-          if (dist_ij <= dc) {
-            // sum weights within N_{dc}(i)
+          if (dist_ij <= dc_effective) {
+            // sum weights within N_{dc_effective}(i)
             points.rho[i] += (i == j ? 1.f : 0.5f) * points.weight[j];
           }
         }  // end of interate inside this bin
@@ -89,10 +92,11 @@ void calculate_density(std::array<LayerTiles, NLAYERS> &d_hist,
 
 void calculate_distanceToHigher(std::array<LayerTiles, NLAYERS> &d_hist,
                                 PointsCloud &points, float outlierDeltaFactor,
-                                float dc) {
+                                const float dc[]) {
   // loop over all points
-  float dm = outlierDeltaFactor * dc;
   for (unsigned int i = 0; i < points.n; i++) {
+    float dc_effective = points.layer[i] < 41 ? dc[0] : dc[1];
+    float dm = outlierDeltaFactor * dc_effective;
     // default values of delta and nearest higher for i
     float delta_i = std::numeric_limits<float>::max();
     int nearestHigher_i = -1;
@@ -139,13 +143,16 @@ void calculate_distanceToHigher(std::array<LayerTiles, NLAYERS> &d_hist,
 };
 
 int findAndAssign_clusters(PointsCloud &points, float outlierDeltaFactor,
-                            float dc, float rhoc) {
+                           const float dc[],
+                           const float rhoc[]) {
   int nClusters = 0;
 
   // find cluster seeds and outlier
   std::vector<int> localStack;
   // loop over all points
   for (unsigned int i = 0; i < points.n; i++) {
+    float dc_effective = points.layer[i] < 41 ? dc[0] : dc[1];
+    float rhoc_effective = points.layer[i] < 41 ? rhoc[0] : rhoc[1];
     // initialize clusterIndex
     points.clusterIndex[i] = -1;
 
@@ -153,8 +160,8 @@ int findAndAssign_clusters(PointsCloud &points, float outlierDeltaFactor,
     float rhoi = points.rho[i];
 
     // determine seed or outlier
-    bool isSeed = (deltai > dc) and (rhoi >= rhoc);
-    bool isOutlier = (deltai > outlierDeltaFactor * dc) and (rhoi < rhoc);
+    bool isSeed = (deltai > dc_effective) and (rhoi >= rhoc_effective);
+    bool isOutlier = (deltai > outlierDeltaFactor * dc_effective) and (rhoi < rhoc_effective);
     if (isSeed) {
       // set isSeed as 1
       points.isSeed[i] = 1;
