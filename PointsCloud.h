@@ -60,6 +60,7 @@ struct ClustersSoA {
     z.resize(total_clusters, 0.f);
     energy.resize(total_clusters, 0.f);
     layer.resize(total_clusters, 0);
+    size.resize(total_clusters, 0);
 
     int counter = 0;
     for (auto const & cl :  clusters) {
@@ -70,6 +71,7 @@ struct ClustersSoA {
       z[counter] = std::get<2>(cl_pos);
       energy[counter] = cl.energy();
       layer[counter] = cl.layer();
+      size[counter] = cl.hits().size();
 
       counter++;
     }
@@ -80,6 +82,7 @@ struct ClustersSoA {
   std::vector<float> z;
   std::vector<float> energy;
   std::vector<int> layer;
+  std::vector<int> size;
 };
 
 #endif

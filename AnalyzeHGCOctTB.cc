@@ -64,7 +64,8 @@ int main(int argc, char *argv[])  //, int argvv[])
 }
 
 void AnalyzeHGCOctTB::EventLoop(const char *data, const char *energy) {
-  bool NTUPLEOUT = true;
+
+  bool NTUPLEOUT = false;
   if (fChain == 0) return;
 
   Long64_t nentries = fChain->GetEntriesFast();
@@ -193,6 +194,7 @@ void AnalyzeHGCOctTB::EventLoop(const char *data, const char *energy) {
   clusters_tree.Branch("clusters_z", &clusters_soa.z);
   clusters_tree.Branch("clusters_energy", &clusters_soa.energy);
   clusters_tree.Branch("clusters_layer", &clusters_soa.layer);
+  clusters_tree.Branch("clusters_size", &clusters_soa.size);
 
   for (jentry = 0; jentry < nentries; jentry++, hgc_jentry++) {
 
