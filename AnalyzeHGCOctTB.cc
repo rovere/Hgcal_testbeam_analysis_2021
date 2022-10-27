@@ -281,7 +281,7 @@ void AnalyzeHGCOctTB::EventLoop(const char *data, const char *energy) {
     std::array<LayerTiles, NLAYERS> tiles;
     constexpr float MIP2GeV[3] = {0.0105, 0.0812, 0.12508};
     constexpr float dc[2] = {1.3f, 3.f * sqrt(2.f) + 0.1};
-    constexpr float rhoc[2] = {8.f * MIP2GeV[0], 8.f * MIP2GeV[2]};
+    constexpr float rhoc[2] = {4.f * MIP2GeV[0], 4.f * MIP2GeV[2]};
     constexpr float outlierDeltaFactor = 2.f;
     pcloud.x = *comb_rechit_x_trimAhcal;
     pcloud.y = *comb_rechit_y_trimAhcal;
